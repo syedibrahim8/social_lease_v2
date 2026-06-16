@@ -1,13 +1,12 @@
 import type { Document, Model, Types } from 'mongoose';
 
-/**
- * Verification states. Used by BOTH `profileOwnershipStatus` (has the creator
- * proven they control the linked social accounts?) and `verificationStatus`
- * (has an admin vetted the profile?). These are system/admin controlled — never
- * settable by the creator through profile create/update.
- */
-export const VERIFICATION_STATES = ['UNVERIFIED', 'PENDING', 'VERIFIED', 'REJECTED'] as const;
-export type VerificationState = (typeof VERIFICATION_STATES)[number];
+// Shared verification states (used by `profileOwnershipStatus` — has the creator
+// proven they control the linked social accounts? — and `verificationStatus` —
+// has an admin vetted the profile?). System/admin controlled, never set by the
+// creator. Re-exported so existing imports from this module keep working.
+export { VERIFICATION_STATES } from '@/types/verification';
+export type { VerificationState } from '@/types/verification';
+import type { VerificationState } from '@/types/verification';
 
 export const MEDIA_TYPES = ['image', 'video'] as const;
 export type MediaType = (typeof MEDIA_TYPES)[number];
