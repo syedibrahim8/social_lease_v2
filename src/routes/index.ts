@@ -6,6 +6,9 @@ import { brandRouter } from '@/modules/brands/brand.routes';
 import { campaignRouter } from '@/modules/campaigns/campaign.routes';
 import { applicationRouter } from '@/modules/applications/application.routes';
 import { contractRouter } from '@/modules/contracts/contract.routes';
+import { paymentRouter } from '@/modules/payments/payment.routes';
+import { submissionRouter } from '@/modules/submissions/submission.routes';
+import { assetRouter } from '@/modules/assets/asset.routes';
 
 /**
  * Root API router. Every feature module registers its router here as it is
@@ -21,8 +24,11 @@ router.use('/brands', brandRouter);
 router.use('/campaigns', campaignRouter);
 router.use('/applications', applicationRouter);
 router.use('/contracts', contractRouter);
+router.use('/payments', paymentRouter);
+router.use('/submissions', submissionRouter);
+router.use('/assets', assetRouter);
 
 // Future module routers are mounted here:
-// router.use('/payments', paymentRouter);
+// router.use('/reviews', reviewRouter);
 
 export { router as apiRouter };

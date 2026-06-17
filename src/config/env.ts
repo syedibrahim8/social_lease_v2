@@ -81,6 +81,14 @@ const envSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
   EMAIL_FROM: z.string().default('Creator Asset Marketplace <no-reply@creatorassets.dev>'),
+
+  // Stripe — optional. When unset, payment endpoints respond 501 (not configured).
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  // Platform commission taken from each payout, as a percentage (0–100).
+  PLATFORM_COMMISSION_PERCENT: z.coerce.number().min(0).max(100).default(10),
+  // Default country for creators' Stripe Express connected accounts.
+  STRIPE_CONNECT_COUNTRY: z.string().length(2).toUpperCase().default('US'),
 });
 
 const parsed = envSchema.safeParse(process.env);

@@ -2,6 +2,7 @@ import { ApiError } from '@/utils/ApiError';
 import { resolvePagination, buildPaginationMeta, type Paginated } from '@/utils/pagination';
 import { campaignRepository } from '@/modules/campaigns/campaign.repository';
 import { contractService } from '@/modules/contracts/contract.service';
+import { paymentService } from '@/modules/payments/payment.service';
 import {
   applicationRepository,
   type ApplicationFilter,
@@ -37,6 +38,9 @@ export const applicationService = {
     if (campaign.status !== 'PUBLISHED') {
       throw ApiError.conflict('This campaign is not open for applications');
     }
+    // Only let creators who can actually be paid out engage — otherwise escrow
+    // could fund work we can't release, inviting disputes.
+    await paymentService.assertCreatorCanReceivePayouts(creatorId);
     if (await applicationRepository.existsForCampaignAndCreator(dto.campaignId, creatorId)) {
       throw ApiError.conflict('You have already applied to this campaign');
     }

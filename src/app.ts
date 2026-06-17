@@ -11,6 +11,7 @@ import { rateLimiter } from '@/middleware/rateLimiter.middleware';
 import { notFound } from '@/middleware/notFound.middleware';
 import { errorHandler } from '@/middleware/error.middleware';
 import { ApiError } from '@/utils/ApiError';
+import { stripeWebhookHandler } from '@/modules/payments/payment.webhook';
 
 /**
  * Builds and configures the Express application.
@@ -54,6 +55,15 @@ export function createApp(): Application {
       },
       credentials: true,
     })
+  );
+
+  // Stripe webhook MUST receive the raw body for signature verification, so it
+  // is mounted with express.raw BEFORE the JSON parser (which would otherwise
+  // consume and re-serialize the stream, breaking the signature).
+  app.post(
+    `${env.API_PREFIX}/payments/webhook`,
+    express.raw({ type: 'application/json' }),
+    stripeWebhookHandler
   );
 
   // Body & cookie parsing, with a sane size limit to blunt large-payload abuse.
