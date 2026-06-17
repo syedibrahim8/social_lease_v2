@@ -1,6 +1,7 @@
 import { ApiError } from '@/utils/ApiError';
 import { resolvePagination, buildPaginationMeta, type Paginated } from '@/utils/pagination';
 import { campaignRepository } from '@/modules/campaigns/campaign.repository';
+import { contractService } from '@/modules/contracts/contract.service';
 import {
   applicationRepository,
   type ApplicationFilter,
@@ -117,6 +118,9 @@ export const applicationService = {
     );
     await applicationRepository.rejectOtherApplicantsForCampaign(app.campaignId.toString(), id);
     await campaignRepository.updateById(app.campaignId.toString(), { status: 'NEGOTIATION' });
+
+    // Agreement reached → auto-generate the formal contract record.
+    await contractService.createFromApplication(app, campaign);
 
     return (await applicationRepository.findById(id)) ?? app;
   },
