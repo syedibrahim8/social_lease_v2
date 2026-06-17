@@ -3,6 +3,7 @@ import { healthRouter } from '@/routes/health.routes';
 import { authRouter } from '@/modules/auth/auth.routes';
 import { creatorRouter } from '@/modules/creators/creator.routes';
 import { brandRouter } from '@/modules/brands/brand.routes';
+import { campaignRouter } from '@/modules/campaigns/campaign.routes';
 
 /**
  * Root API router. Every feature module registers its router here as it is
@@ -15,8 +16,9 @@ router.use(healthRouter);
 router.use('/auth', authRouter);
 router.use('/creators', creatorRouter);
 router.use('/brands', brandRouter);
+router.use('/campaigns', campaignRouter);
 
 // Future module routers are mounted here:
-// router.use('/campaigns', campaignRouter);
+// router.use('/applications', applicationRouter);
 
 export { router as apiRouter };
