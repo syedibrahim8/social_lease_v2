@@ -1,6 +1,7 @@
 import type { FilterQuery } from 'mongoose';
 import { BrandProfileModel } from '@/modules/brands/brand.model';
 import type { IBrandProfileDocument } from '@/modules/brands/brand.types';
+import type { VerificationState } from '@/types/verification';
 import type { PageParams } from '@/utils/pagination';
 import type { CreateBrandDto, UpdateBrandDto } from '@/modules/brands/brand.validators';
 
@@ -45,6 +46,21 @@ export const brandRepository = {
 
   deleteByUserId(userId: string): Promise<IBrandProfileDocument | null> {
     return BrandProfileModel.findOneAndDelete({ userId }).exec();
+  },
+
+  /**
+   * Set the admin-controlled `verifiedStatus` (blocked from owner edits) — used
+   * by the verifications module on approval.
+   */
+  setVerification(
+    userId: string,
+    verifiedStatus: VerificationState
+  ): Promise<IBrandProfileDocument | null> {
+    return BrandProfileModel.findOneAndUpdate(
+      { userId },
+      { $set: { verifiedStatus } },
+      { new: true }
+    ).exec();
   },
 
   async list(

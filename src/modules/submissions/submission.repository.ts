@@ -1,6 +1,12 @@
 import type { FilterQuery } from 'mongoose';
 import { SubmissionModel } from '@/modules/submissions/submission.model';
-import type { ISubmission, ISubmissionDocument } from '@/modules/submissions/submission.types';
+import {
+  ACTIVE_SUBMISSION_STATUSES,
+  type IDeliveryFile,
+  type IDeliveryLink,
+  type ISubmission,
+  type ISubmissionDocument,
+} from '@/modules/submissions/submission.types';
 import type { PageParams } from '@/utils/pagination';
 
 const POPULATE = [
@@ -20,9 +26,9 @@ interface NewSubmission {
   assetType: ISubmission['assetType'];
   platform: ISubmission['platform'];
   revision: number;
-  mediaUrls: string[];
+  files: IDeliveryFile[];
+  links: IDeliveryLink[];
   note?: string | undefined;
-  liveUrl?: string | undefined;
   analytics?: ISubmission['analytics'] | undefined;
 }
 
@@ -47,6 +53,14 @@ export const submissionRepository = {
 
   countByContract(contractId: string): Promise<number> {
     return SubmissionModel.countDocuments({ contractId }).exec();
+  },
+
+  /** The single active (non-terminal) delivery for a contract, if any. */
+  findActiveByContract(contractId: string): Promise<ISubmissionDocument | null> {
+    return SubmissionModel.findOne({
+      contractId,
+      status: { $in: ACTIVE_SUBMISSION_STATUSES },
+    }).exec();
   },
 
   async list(

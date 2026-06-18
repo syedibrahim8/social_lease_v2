@@ -5,6 +5,7 @@ import { validate } from '@/middleware/validate.middleware';
 import { submissionController } from '@/modules/submissions/submission.controller';
 import {
   createSubmissionSchema,
+  updateSubmissionSchema,
   reviewSubmissionSchema,
   listSubmissionsQuerySchema,
   submissionIdParamsSchema,
@@ -12,15 +13,16 @@ import {
 } from '@/modules/submissions/submission.validators';
 
 /**
- * Submission routes, mounted at `${API_PREFIX}/submissions`.
+ * Campaign delivery (proof-of-work) routes, mounted at `${API_PREFIX}/submissions`.
  *
- * Creator submits proof + lists own work; brand lists received + reviews
- * (approve / request-revision). Reads are party-scoped (404 to non-parties).
- * `/mine`, `/received` and `/contract/:contractId` are declared before `/:id`.
+ * Creator uploads proof (DRAFT) → updates → submits for review; brand reviews
+ * (approve / reject / request-revision). Reads are party-scoped (404 to
+ * non-parties; brand can't see a creator's DRAFT). `/mine`, `/received` and
+ * `/contract/:contractId` are declared before `/:id`.
  */
 const router = Router();
 
-// Creator: submit proof of work + view own submissions.
+// Creator: upload proof (draft) + view own deliveries.
 router.post(
   '/',
   authenticate,
@@ -53,6 +55,22 @@ router.get(
   submissionController.listForContract
 );
 
+// Creator: update a draft + submit it for review.
+router.patch(
+  '/:id',
+  authenticate,
+  authorize('CREATOR'),
+  validate({ params: submissionIdParamsSchema, body: updateSubmissionSchema }),
+  submissionController.update
+);
+router.post(
+  '/:id/submit',
+  authenticate,
+  authorize('CREATOR'),
+  validate({ params: submissionIdParamsSchema }),
+  submissionController.submit
+);
+
 // Brand review actions.
 router.post(
   '/:id/approve',
@@ -60,6 +78,13 @@ router.post(
   authorize('BRAND'),
   validate({ params: submissionIdParamsSchema }),
   submissionController.approve
+);
+router.post(
+  '/:id/reject',
+  authenticate,
+  authorize('BRAND'),
+  validate({ params: submissionIdParamsSchema, body: reviewSubmissionSchema }),
+  submissionController.reject
 );
 router.post(
   '/:id/request-revision',

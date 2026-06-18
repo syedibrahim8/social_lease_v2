@@ -6,6 +6,7 @@ import { submissionService } from '@/modules/submissions/submission.service';
 import type {
   CreateSubmissionDto,
   ReviewSubmissionDto,
+  UpdateSubmissionDto,
 } from '@/modules/submissions/submission.validators';
 
 function requireUserId(req: Request): string {
@@ -35,7 +36,18 @@ export const submissionController = {
   create: asyncHandler(async (req, res) => {
     const dto = req.body as CreateSubmissionDto;
     const submission = await submissionService.create(requireUserId(req), dto);
-    return ApiResponse.created(res, submission, 'Submission created');
+    return ApiResponse.created(res, submission, 'Proof uploaded (draft)');
+  }),
+
+  update: asyncHandler(async (req, res) => {
+    const dto = req.body as UpdateSubmissionDto;
+    const submission = await submissionService.update(requireId(req), requireUserId(req), dto);
+    return ApiResponse.ok(res, submission, 'Proof updated');
+  }),
+
+  submit: asyncHandler(async (req, res) => {
+    const submission = await submissionService.submit(requireId(req), requireUserId(req));
+    return ApiResponse.ok(res, submission, 'Delivery submitted for review');
   }),
 
   approve: asyncHandler(async (req, res) => {
@@ -54,6 +66,16 @@ export const submissionController = {
       reviewNote
     );
     return ApiResponse.ok(res, submission, 'Revision requested');
+  }),
+
+  reject: asyncHandler(async (req, res) => {
+    const { reviewNote } = req.body as ReviewSubmissionDto;
+    const submission = await submissionService.reject(
+      requireId(req),
+      requireUserId(req),
+      reviewNote
+    );
+    return ApiResponse.ok(res, submission, 'Submission rejected');
   }),
 
   listMine: asyncHandler(async (req, res) => {

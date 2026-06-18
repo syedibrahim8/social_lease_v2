@@ -1,6 +1,6 @@
 import type { FilterQuery } from 'mongoose';
 import { CreatorProfileModel } from '@/modules/creators/creator.model';
-import type { ICreatorProfileDocument } from '@/modules/creators/creator.types';
+import type { ICreatorProfile, ICreatorProfileDocument } from '@/modules/creators/creator.types';
 import type { PageParams } from '@/utils/pagination';
 import type { CreateCreatorDto, UpdateCreatorDto } from '@/modules/creators/creator.validators';
 
@@ -47,6 +47,18 @@ export const creatorRepository = {
 
   deleteByUserId(userId: string): Promise<ICreatorProfileDocument | null> {
     return CreatorProfileModel.findOneAndDelete({ userId }).exec();
+  },
+
+  /**
+   * Set admin-controlled verification fields. The only path that may write
+   * `verificationStatus` / `profileOwnershipStatus` (blocked from owner edits) —
+   * used by the verifications module on approval.
+   */
+  setVerification(
+    userId: string,
+    data: Partial<Pick<ICreatorProfile, 'verificationStatus' | 'profileOwnershipStatus'>>
+  ): Promise<ICreatorProfileDocument | null> {
+    return CreatorProfileModel.findOneAndUpdate({ userId }, { $set: data }, { new: true }).exec();
   },
 
   async list(

@@ -8,41 +8,52 @@ import {
   submissionRepository,
   type SubmissionFilter,
 } from '@/modules/submissions/submission.repository';
-import type { ISubmissionDocument } from '@/modules/submissions/submission.types';
+import {
+  EDITABLE_SUBMISSION_STATUSES,
+  type ISubmissionDocument,
+} from '@/modules/submissions/submission.types';
 import type {
   CreateSubmissionDto,
   ListSubmissionsQuery,
+  UpdateSubmissionDto,
 } from '@/modules/submissions/submission.validators';
 
 /** Contract states from which a creator may (re)submit proof of work. */
 const SUBMITTABLE_CONTRACT_STATUSES = ['FUNDED', 'IN_PROGRESS'] as const;
 
+function isSubmittable(status: string): boolean {
+  return (SUBMITTABLE_CONTRACT_STATUSES as readonly string[]).includes(status);
+}
+
 /**
- * Submission use-cases — the proof-of-work step between funding and payout.
+ * Campaign delivery (proof of work) use-cases — the step between funding and
+ * payout.
  *
- * Flow: creator submits against a FUNDED contract (→ SUBMITTED); the brand
- * either approves (→ APPROVED, then auto-release of the escrowed payout) or
- * requests a revision (→ IN_PROGRESS, creator resubmits). The payout can only
- * move once a submission is APPROVED — see `paymentService.releasePayment`.
+ * Creators upload proof against a FUNDED contract (DRAFT), edit it, then submit
+ * it for review. The brand approves (→ APPROVED, auto-releasing the escrowed
+ * payout), rejects, or requests a revision. The payout only moves once a
+ * delivery is APPROVED — see `paymentService.releasePayment`.
  */
 export const submissionService = {
-  /** Creator submits proof of work for a funded contract. */
+  /** Upload proof — create a DRAFT delivery for a funded contract. */
   async create(creatorId: string, dto: CreateSubmissionDto): Promise<ISubmissionDocument> {
     const contract = await contractRepository.findDocById(dto.contractId);
     if (!contract) {
       throw ApiError.notFound('Contract not found');
     }
     if (contract.creatorId.toString() !== creatorId) {
-      throw ApiError.forbidden('Only the assigned creator can submit work for this contract');
+      throw ApiError.forbidden('Only the assigned creator can deliver work for this contract');
     }
     if (contract.status === 'PENDING_FUNDING') {
       throw ApiError.conflict('This contract has not been funded yet');
     }
-    if (contract.status === 'SUBMITTED') {
-      throw ApiError.conflict('A submission is already awaiting the brand’s review');
+    if (!isSubmittable(contract.status)) {
+      throw ApiError.conflict(`Work cannot be delivered while the contract is ${contract.status}`);
     }
-    if (!SUBMITTABLE_CONTRACT_STATUSES.includes(contract.status as never)) {
-      throw ApiError.conflict(`Work cannot be submitted while the contract is ${contract.status}`);
+    if (await submissionRepository.findActiveByContract(dto.contractId)) {
+      throw ApiError.conflict(
+        'You already have an active delivery for this contract — update it instead'
+      );
     }
 
     const revision = (await submissionRepository.countByContract(dto.contractId)) + 1;
@@ -54,24 +65,66 @@ export const submissionService = {
       assetType: contract.assetType,
       platform: contract.platform,
       revision,
-      mediaUrls: dto.mediaUrls ?? [],
+      files: dto.files ?? [],
+      links: dto.links ?? [],
       note: dto.note,
-      liveUrl: dto.liveUrl,
       analytics: dto.analytics,
     });
+
+    return (await submissionRepository.findById(submission._id.toString())) ?? submission;
+  },
+
+  /** Update proof — edit a DRAFT / REVISION_REQUESTED delivery. */
+  async update(
+    id: string,
+    creatorId: string,
+    dto: UpdateSubmissionDto
+  ): Promise<ISubmissionDocument> {
+    const submission = await this.loadOwned(id, creatorId);
+    if (!EDITABLE_SUBMISSION_STATUSES.includes(submission.status)) {
+      throw ApiError.conflict(`A ${submission.status} delivery can no longer be edited`);
+    }
+    if (dto.files !== undefined) submission.files = dto.files;
+    if (dto.links !== undefined) submission.links = dto.links;
+    if (dto.note !== undefined) submission.note = dto.note;
+    if (dto.analytics !== undefined) submission.analytics = dto.analytics;
+    await submissionRepository.save(submission);
+    return (await submissionRepository.findById(id)) ?? submission;
+  },
+
+  /** Submit a delivery for the brand's review (DRAFT/REVISION_REQUESTED → SUBMITTED). */
+  async submit(id: string, creatorId: string): Promise<ISubmissionDocument> {
+    const submission = await this.loadOwned(id, creatorId);
+    if (!EDITABLE_SUBMISSION_STATUSES.includes(submission.status)) {
+      throw ApiError.conflict(`A ${submission.status} delivery cannot be submitted`);
+    }
+    if (submission.files.length === 0 && submission.links.length === 0) {
+      throw ApiError.badRequest('Attach at least one file or link as proof before submitting');
+    }
+    const contract = await contractRepository.findDocById(submission.contractId.toString());
+    if (!contract) {
+      throw ApiError.notFound('Contract not found');
+    }
+    if (!isSubmittable(contract.status)) {
+      throw ApiError.conflict(`This contract is ${contract.status} and cannot receive a delivery`);
+    }
+
+    if (submission.status === 'REVISION_REQUESTED') submission.revision += 1;
+    submission.status = 'SUBMITTED';
+    submission.submittedAt = new Date();
+    await submissionRepository.save(submission);
 
     contract.status = 'SUBMITTED';
     await contractRepository.save(contract);
     await campaignRepository.updateById(contract.campaignId.toString(), { status: 'SUBMITTED' });
 
-    return (await submissionRepository.findById(submission._id.toString())) ?? submission;
+    return (await submissionRepository.findById(id)) ?? submission;
   },
 
   /**
    * Brand approves the proof → contract APPROVED, then auto-release the escrowed
-   * payout if the creator is payout-ready. If the creator hasn't finished Connect
-   * onboarding, the contract stays APPROVED and the brand can complete the payout
-   * later via the payments release endpoint.
+   * payout if the creator is payout-ready (else the contract stays APPROVED and
+   * the brand completes the payout once the creator finishes onboarding).
    */
   async approve(
     id: string,
@@ -93,7 +146,7 @@ export const submissionService = {
 
     const { released } = await paymentService.releaseForApprovedContract(contract._id.toString());
     if (!released) {
-      logger.info('Submission approved; payout deferred until the creator completes onboarding', {
+      logger.info('Delivery approved; payout deferred until the creator completes onboarding', {
         submissionId: id,
         contractId: contract._id.toString(),
       });
@@ -103,10 +156,81 @@ export const submissionService = {
     return { submission: fresh, released };
   },
 
-  /** Brand requests changes → submission REVISION_REQUESTED, contract back to IN_PROGRESS. */
+  /** Brand requests changes → REVISION_REQUESTED, contract back to IN_PROGRESS. */
   async requestRevision(
     id: string,
     brandUserId: string,
+    reviewNote: string
+  ): Promise<ISubmissionDocument> {
+    return this.returnForRework(id, brandUserId, 'REVISION_REQUESTED', reviewNote);
+  },
+
+  /** Brand rejects the proof → REJECTED, contract back to IN_PROGRESS. */
+  async reject(id: string, brandUserId: string, reviewNote: string): Promise<ISubmissionDocument> {
+    return this.returnForRework(id, brandUserId, 'REJECTED', reviewNote);
+  },
+
+  // --- reads -------------------------------------------------------------
+
+  /** Fetch one delivery — parties only; the brand can't see a creator's DRAFT. */
+  async getById(id: string, userId: string): Promise<ISubmissionDocument> {
+    const submission = await this.loadParty(id, userId);
+    if (submission.status === 'DRAFT' && submission.creatorId.toString() !== userId) {
+      throw ApiError.notFound('Submission not found');
+    }
+    return (await submissionRepository.findById(id)) ?? submission;
+  },
+
+  /** The creator's own deliveries. */
+  listMine(
+    creatorId: string,
+    query: ListSubmissionsQuery
+  ): Promise<Paginated<ISubmissionDocument>> {
+    const filter: SubmissionFilter = { creatorId };
+    if (query.status) filter.status = query.status;
+    if (query.contractId) filter.contractId = query.contractId;
+    return this.paginate(filter, query);
+  },
+
+  /** Deliveries a brand has received (DRAFTs are hidden). */
+  listReceived(
+    brandUserId: string,
+    query: ListSubmissionsQuery
+  ): Promise<Paginated<ISubmissionDocument>> {
+    const filter: SubmissionFilter = { brandId: brandUserId };
+    filter.status = query.status && query.status !== 'DRAFT' ? query.status : { $ne: 'DRAFT' };
+    if (query.contractId) filter.contractId = query.contractId;
+    return this.paginate(filter, query);
+  },
+
+  /** Full delivery history for one contract — parties only (DRAFTs hidden from brand). */
+  async listForContract(
+    contractId: string,
+    userId: string,
+    query: ListSubmissionsQuery
+  ): Promise<Paginated<ISubmissionDocument>> {
+    const contract = await contractRepository.findDocById(contractId);
+    const isCreator = contract?.creatorId.toString() === userId;
+    const isBrand = contract?.brandId.toString() === userId;
+    if (!isCreator && !isBrand) {
+      throw ApiError.notFound('Contract not found');
+    }
+    const filter: SubmissionFilter = { contractId };
+    if (isBrand && !isCreator) {
+      filter.status = query.status && query.status !== 'DRAFT' ? query.status : { $ne: 'DRAFT' };
+    } else if (query.status) {
+      filter.status = query.status;
+    }
+    return this.paginate(filter, query);
+  },
+
+  // --- internal ----------------------------------------------------------
+
+  /** Shared reject / request-revision transition (→ contract IN_PROGRESS). */
+  async returnForRework(
+    id: string,
+    brandUserId: string,
+    status: 'REJECTED' | 'REVISION_REQUESTED',
     reviewNote: string
   ): Promise<ISubmissionDocument> {
     const submission = await this.loadForReview(id, brandUserId);
@@ -115,7 +239,7 @@ export const submissionService = {
       throw ApiError.notFound('Contract not found');
     }
 
-    submission.status = 'REVISION_REQUESTED';
+    submission.status = status;
     submission.reviewNote = reviewNote;
     submission.reviewedAt = new Date();
     await submissionRepository.save(submission);
@@ -127,56 +251,6 @@ export const submissionService = {
     return (await submissionRepository.findById(id)) ?? submission;
   },
 
-  // --- reads -------------------------------------------------------------
-
-  /** Fetch one submission — parties only (404 to everyone else). */
-  async getById(id: string, userId: string): Promise<ISubmissionDocument> {
-    const submission = await this.loadParty(id, userId);
-    return (await submissionRepository.findById(id)) ?? submission;
-  },
-
-  /** The creator's own submissions. */
-  listMine(
-    creatorId: string,
-    query: ListSubmissionsQuery
-  ): Promise<Paginated<ISubmissionDocument>> {
-    const filter: SubmissionFilter = { creatorId };
-    if (query.status) filter.status = query.status;
-    if (query.contractId) filter.contractId = query.contractId;
-    return this.paginate(filter, query);
-  },
-
-  /** Submissions a brand has received across their contracts. */
-  listReceived(
-    brandUserId: string,
-    query: ListSubmissionsQuery
-  ): Promise<Paginated<ISubmissionDocument>> {
-    const filter: SubmissionFilter = { brandId: brandUserId };
-    if (query.status) filter.status = query.status;
-    if (query.contractId) filter.contractId = query.contractId;
-    return this.paginate(filter, query);
-  },
-
-  /** Full submission history for one contract — parties only. */
-  async listForContract(
-    contractId: string,
-    userId: string,
-    query: ListSubmissionsQuery
-  ): Promise<Paginated<ISubmissionDocument>> {
-    const contract = await contractRepository.findDocById(contractId);
-    const isParty =
-      contract &&
-      (contract.brandId.toString() === userId || contract.creatorId.toString() === userId);
-    if (!isParty) {
-      throw ApiError.notFound('Contract not found');
-    }
-    const filter: SubmissionFilter = { contractId };
-    if (query.status) filter.status = query.status;
-    return this.paginate(filter, query);
-  },
-
-  // --- internal ----------------------------------------------------------
-
   async paginate(
     filter: SubmissionFilter,
     query: ListSubmissionsQuery
@@ -186,19 +260,31 @@ export const submissionService = {
     return { items, meta: buildPaginationMeta(page, limit, total) };
   },
 
-  /** Load a pending submission and assert the caller is its brand (else 404/409). */
+  /** Load a delivery and assert the caller is the owning creator (else 404/403). */
+  async loadOwned(id: string, creatorId: string): Promise<ISubmissionDocument> {
+    const submission = await submissionRepository.findDocById(id);
+    if (!submission) {
+      throw ApiError.notFound('Submission not found');
+    }
+    if (submission.creatorId.toString() !== creatorId) {
+      throw ApiError.forbidden('You can only manage your own deliveries');
+    }
+    return submission;
+  },
+
+  /** Load a SUBMITTED delivery and assert the caller is its brand (else 404/409). */
   async loadForReview(id: string, brandUserId: string): Promise<ISubmissionDocument> {
     const submission = await submissionRepository.findDocById(id);
     if (!submission || submission.brandId.toString() !== brandUserId) {
       throw ApiError.notFound('Submission not found');
     }
-    if (submission.status !== 'PENDING') {
-      throw ApiError.conflict(`This submission has already been reviewed (${submission.status})`);
+    if (submission.status !== 'SUBMITTED') {
+      throw ApiError.conflict(`This delivery is ${submission.status} and is not awaiting review`);
     }
     return submission;
   },
 
-  /** Load a submission and assert the caller is a party (else 404). */
+  /** Load a delivery and assert the caller is a party (else 404). */
   async loadParty(id: string, userId: string): Promise<ISubmissionDocument> {
     const submission = await submissionRepository.findDocById(id);
     if (!submission) {

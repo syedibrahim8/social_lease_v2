@@ -1,6 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { ASSET_TYPES, PLATFORMS } from '@/modules/campaigns/campaign.types';
 import {
+  DELIVERY_FILE_TYPES,
   SUBMISSION_STATUSES,
   type ISubmissionDocument,
   type ISubmissionModel,
@@ -18,6 +19,23 @@ const analyticsSchema = new Schema(
   { _id: false }
 );
 
+const deliveryFileSchema = new Schema(
+  {
+    type: { type: String, enum: DELIVERY_FILE_TYPES, required: true },
+    url: { type: String, required: true, trim: true, maxlength: 2048 },
+    caption: { type: String, trim: true, maxlength: 200 },
+  },
+  { _id: false }
+);
+
+const deliveryLinkSchema = new Schema(
+  {
+    url: { type: String, required: true, trim: true, maxlength: 2048 },
+    label: { type: String, trim: true, maxlength: 120 },
+  },
+  { _id: false }
+);
+
 const submissionSchema = new Schema<ISubmissionDocument, ISubmissionModel>(
   {
     // `contractId` is indexed via the partial-unique index below; `brandId` /
@@ -29,19 +47,20 @@ const submissionSchema = new Schema<ISubmissionDocument, ISubmissionModel>(
     assetType: { type: String, enum: ASSET_TYPES, required: true },
     platform: { type: String, enum: PLATFORMS, required: true },
     revision: { type: Number, required: true, min: 1, default: 1 },
-    note: { type: String, trim: true, maxlength: 1000 },
-    liveUrl: { type: String, trim: true, maxlength: 2048 },
-    mediaUrls: { type: [String], default: [] },
-    analytics: { type: analyticsSchema },
     status: {
       type: String,
       enum: SUBMISSION_STATUSES,
-      default: 'PENDING',
+      default: 'DRAFT',
       required: true,
       index: true,
     },
+    files: { type: [deliveryFileSchema], default: [] },
+    links: { type: [deliveryLinkSchema], default: [] },
+    note: { type: String, trim: true, maxlength: 1000 },
+    analytics: { type: analyticsSchema },
     reviewNote: { type: String, trim: true, maxlength: 1000 },
     reviewedAt: { type: Date },
+    submittedAt: { type: Date },
   },
   {
     timestamps: true,
@@ -57,12 +76,13 @@ const submissionSchema = new Schema<ISubmissionDocument, ISubmissionModel>(
   }
 );
 
-// At most one PENDING submission per contract (race-safe, DB-enforced). Once a
-// pending submission is reviewed (APPROVED/REVISION_REQUESTED) the slot frees up
-// for the next resubmission.
+// At most one SUBMITTED (under-review) delivery per contract — race-safe and
+// DB-enforced, so the approve→payout path can never fire twice. A single active
+// (DRAFT/SUBMITTED/REVISION_REQUESTED) delivery per contract is enforced in the
+// service.
 submissionSchema.index(
   { contractId: 1 },
-  { unique: true, partialFilterExpression: { status: 'PENDING' } }
+  { unique: true, partialFilterExpression: { status: 'SUBMITTED' } }
 );
 
 submissionSchema.index({ brandId: 1, createdAt: -1 });
