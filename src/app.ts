@@ -12,6 +12,7 @@ import { notFound } from '@/middleware/notFound.middleware';
 import { errorHandler } from '@/middleware/error.middleware';
 import { ApiError } from '@/utils/ApiError';
 import { stripeWebhookHandler } from '@/modules/payments/payment.webhook';
+import { registerNotificationListeners } from '@/modules/notifications/notification.listeners';
 
 /**
  * Builds and configures the Express application.
@@ -31,6 +32,9 @@ import { stripeWebhookHandler } from '@/modules/payments/payment.webhook';
  */
 export function createApp(): Application {
   const app = express();
+
+  // Subscribe the notifications module to domain events (idempotent).
+  registerNotificationListeners();
 
   // Trust the first proxy hop (needed for correct IPs + rate limiting on PaaS).
   app.set('trust proxy', 1);

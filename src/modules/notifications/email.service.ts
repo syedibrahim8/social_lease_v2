@@ -1,5 +1,6 @@
 import { sendMail, type MailResult } from '@/config/mailer';
 import {
+  notificationTemplate,
   passwordChangedTemplate,
   passwordResetTemplate,
   verifyEmailTemplate,
@@ -40,6 +41,15 @@ export const emailService = {
   /** Security confirmation after a password is changed/reset. */
   sendPasswordChanged(to: string, name: string): Promise<MailResult> {
     return deliver(to, passwordChangedTemplate(name));
+  },
+
+  /** Generic event notification (the email channel of the notifications module). */
+  sendNotification(
+    to: string,
+    name: string,
+    content: { title: string; body: string; actionUrl?: string }
+  ): Promise<MailResult> {
+    return deliver(to, notificationTemplate(name, content));
   },
 };
 

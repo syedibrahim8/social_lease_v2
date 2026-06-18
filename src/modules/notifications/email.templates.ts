@@ -88,6 +88,23 @@ export function passwordResetTemplate(name: string, link: string): EmailContent 
   };
 }
 
+/** Generic notification email — drives every event-based notification. */
+export function notificationTemplate(
+  name: string,
+  opts: { title: string; body: string; actionUrl?: string }
+): EmailContent {
+  const cta = opts.actionUrl ? { label: 'View details', url: opts.actionUrl } : undefined;
+  return {
+    subject: opts.title,
+    text: `Hi ${name},\n\n${opts.body}${opts.actionUrl ? `\n\n${opts.actionUrl}` : ''}`,
+    html: layout({
+      heading: opts.title,
+      body: `<p>Hi ${name},</p><p>${opts.body}</p>`,
+      ...(cta ? { cta } : {}),
+    }),
+  };
+}
+
 export function passwordChangedTemplate(name: string): EmailContent {
   const url = `${env.WEB_APP_URL}/login`;
   return {

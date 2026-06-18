@@ -1,5 +1,6 @@
 import { UserModel } from '@/modules/users/user.model';
 import type { IUser, IUserDocument } from '@/modules/users/user.types';
+import type { UserRole } from '@/types/roles';
 
 /**
  * UserRepository — the ONLY place in the codebase that talks to the User
@@ -20,6 +21,12 @@ export const userRepository = {
 
   findByEmail(email: string): Promise<IUserDocument | null> {
     return UserModel.findOne({ email: email.toLowerCase() }).exec();
+  },
+
+  /** All user ids with a given role — used for role-targeted bulk notifications. */
+  async findIdsByRole(role: UserRole): Promise<string[]> {
+    const docs = await UserModel.find({ role }).select('_id').exec();
+    return docs.map((doc) => doc._id.toString());
   },
 
   /** Includes the password hash — for login verification only. */

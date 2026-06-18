@@ -1,5 +1,6 @@
 import { Types } from 'mongoose';
 import { ApiError } from '@/utils/ApiError';
+import { eventBus } from '@/events/event-bus';
 import { resolvePagination, buildPaginationMeta, type Paginated } from '@/utils/pagination';
 import { creatorRepository } from '@/modules/creators/creator.repository';
 import { brandRepository } from '@/modules/brands/brand.repository';
@@ -112,6 +113,13 @@ export const verificationService = {
       toStatus: 'APPROVED',
       note,
     });
+
+    eventBus.emit('verification.approved', {
+      requestId: id,
+      userId: request.userId.toString(),
+      verificationType: request.verificationType,
+    });
+
     return (await verificationRepository.findById(id)) ?? request;
   },
 

@@ -1,4 +1,5 @@
 import { ApiError } from '@/utils/ApiError';
+import { eventBus } from '@/events/event-bus';
 import { resolvePagination, buildPaginationMeta, type Paginated } from '@/utils/pagination';
 import { campaignRepository, type CampaignFilter } from '@/modules/campaigns/campaign.repository';
 import {
@@ -21,8 +22,14 @@ import type {
  */
 export const campaignService = {
   /** Create a draft campaign owned by the calling brand. */
-  createCampaign(brandUserId: string, dto: CreateCampaignDto): Promise<ICampaignDocument> {
-    return campaignRepository.create({ brandId: brandUserId, ...dto });
+  async createCampaign(brandUserId: string, dto: CreateCampaignDto): Promise<ICampaignDocument> {
+    const campaign = await campaignRepository.create({ brandId: brandUserId, ...dto });
+    eventBus.emit('campaign.created', {
+      campaignId: campaign._id.toString(),
+      brandId: brandUserId,
+      title: campaign.title,
+    });
+    return campaign;
   },
 
   /**

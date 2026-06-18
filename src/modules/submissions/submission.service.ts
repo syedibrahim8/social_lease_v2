@@ -1,5 +1,6 @@
 import { logger } from '@/config/logger';
 import { ApiError } from '@/utils/ApiError';
+import { eventBus } from '@/events/event-bus';
 import { resolvePagination, buildPaginationMeta, type Paginated } from '@/utils/pagination';
 import { contractRepository } from '@/modules/contracts/contract.repository';
 import { campaignRepository } from '@/modules/campaigns/campaign.repository';
@@ -151,6 +152,12 @@ export const submissionService = {
         contractId: contract._id.toString(),
       });
     }
+
+    eventBus.emit('submission.approved', {
+      submissionId: id,
+      contractId: contract._id.toString(),
+      creatorId: submission.creatorId.toString(),
+    });
 
     const fresh = (await submissionRepository.findById(id)) ?? submission;
     return { submission: fresh, released };

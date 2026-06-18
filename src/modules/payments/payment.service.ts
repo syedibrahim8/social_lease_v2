@@ -1,6 +1,7 @@
 import { env } from '@/config/env';
 import { logger } from '@/config/logger';
 import { isStripeConfigured } from '@/config/stripe';
+import { eventBus } from '@/events/event-bus';
 import { ApiError } from '@/utils/ApiError';
 import { resolvePagination, buildPaginationMeta, type Paginated } from '@/utils/pagination';
 import { userRepository } from '@/modules/users/user.repository';
@@ -329,6 +330,14 @@ export const paymentService = {
       amount: payment.creatorAmount,
       currency: payment.currency,
       description: `Escrow funded for contract ${payment.contractId.toString()}`,
+    });
+
+    eventBus.emit('payment.received', {
+      paymentId,
+      contractId: payment.contractId.toString(),
+      creatorId: payment.creatorId.toString(),
+      amount: payment.creatorAmount,
+      currency: payment.currency,
     });
 
     logger.info('Payment captured (escrow funded)', { paymentId, amount: payment.amount });

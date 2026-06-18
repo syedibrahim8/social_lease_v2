@@ -1,4 +1,5 @@
 import { ApiError } from '@/utils/ApiError';
+import { eventBus } from '@/events/event-bus';
 import { resolvePagination, buildPaginationMeta, type Paginated } from '@/utils/pagination';
 import { campaignRepository } from '@/modules/campaigns/campaign.repository';
 import { contractService } from '@/modules/contracts/contract.service';
@@ -60,6 +61,12 @@ export const applicationService = {
         { sender: creatorId, receiver: brandId, amount: dto.proposedPrice, message: dto.proposal },
       ],
     });
+    eventBus.emit('application.received', {
+      applicationId: created._id.toString(),
+      campaignId: dto.campaignId,
+      brandId,
+      creatorId,
+    });
     return (await applicationRepository.findById(created._id.toString())) ?? created;
   },
 
@@ -86,6 +93,13 @@ export const applicationService = {
     app.status = 'NEGOTIATING';
 
     await applicationRepository.save(app);
+    eventBus.emit('offer.received', {
+      applicationId: id,
+      recipientId: receiver,
+      senderId: userId,
+      amount: dto.amount,
+      currency: app.currency,
+    });
     return (await applicationRepository.findById(id)) ?? app;
   },
 
@@ -125,6 +139,15 @@ export const applicationService = {
 
     // Agreement reached → auto-generate the formal contract record.
     await contractService.createFromApplication(app, campaign);
+
+    // Notify the counterparty (the offer's original sender) that it was accepted.
+    eventBus.emit('offer.accepted', {
+      applicationId: id,
+      campaignId: app.campaignId.toString(),
+      recipientId: pending.sender.toString(),
+      amount: pending.amount,
+      currency: app.currency,
+    });
 
     return (await applicationRepository.findById(id)) ?? app;
   },
