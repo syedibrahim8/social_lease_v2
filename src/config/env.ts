@@ -89,6 +89,12 @@ const envSchema = z.object({
   PLATFORM_COMMISSION_PERCENT: z.coerce.number().min(0).max(100).default(10),
   // Default country for creators' Stripe Express connected accounts.
   STRIPE_CONNECT_COUNTRY: z.string().length(2).toUpperCase().default('US'),
+
+  // OpenAI (AI Services module) — optional. When unset, the deterministic cores
+  // still run; only the LLM enrichment / brief generation degrades gracefully.
+  OPENAI_API_KEY: z.string().optional(),
+  OPENAI_MODEL: z.string().default('gpt-4o-mini'),
+  OPENAI_BASE_URL: z.string().url().default('https://api.openai.com/v1'),
 });
 
 const parsed = envSchema.safeParse(process.env);

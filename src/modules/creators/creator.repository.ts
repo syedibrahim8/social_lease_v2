@@ -61,6 +61,18 @@ export const creatorRepository = {
     return CreatorProfileModel.findOneAndUpdate({ userId }, { $set: data }, { new: true }).exec();
   },
 
+  /** Candidate pool for the recommendation engine (scored in-memory). */
+  listForRecommendation(
+    opts: { minFollowers?: number },
+    limit: number
+  ): Promise<ICreatorProfileDocument[]> {
+    const filter: Record<string, unknown> = {};
+    if (opts.minFollowers !== undefined) {
+      filter['metrics.followers'] = { $gte: opts.minFollowers };
+    }
+    return CreatorProfileModel.find(filter).limit(limit).exec();
+  },
+
   async list(
     filter: CreatorFilter,
     { skip, limit }: PageParams

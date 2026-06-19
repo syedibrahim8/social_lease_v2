@@ -1,4 +1,4 @@
-import type { FilterQuery } from 'mongoose';
+import { Types, type FilterQuery } from 'mongoose';
 import { ContractModel } from '@/modules/contracts/contract.model';
 import type { IContract, IContractDocument } from '@/modules/contracts/contract.types';
 import type { PageParams } from '@/utils/pagination';
@@ -41,6 +41,17 @@ export const contractRepository = {
 
   save(doc: IContractDocument): Promise<IContractDocument> {
     return doc.save();
+  },
+
+  /** Completed-contract counts per creator (recommendation "previous success"). */
+  async countCompletedByCreators(creatorIds: string[]): Promise<Map<string, number>> {
+    if (creatorIds.length === 0) return new Map();
+    const ids = creatorIds.map((id) => new Types.ObjectId(id));
+    const rows = await ContractModel.aggregate<{ _id: Types.ObjectId; count: number }>([
+      { $match: { creatorId: { $in: ids }, status: 'COMPLETED' } },
+      { $group: { _id: '$creatorId', count: { $sum: 1 } } },
+    ]);
+    return new Map(rows.map((row) => [row._id.toString(), row.count]));
   },
 
   async list(
