@@ -20,12 +20,21 @@ export default function Home() {
       </p>
       <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
         <Button asChild variant="brand" size="lg">
-          <Link href="/style">
-            View the design system
+          <Link href="/register">
+            Get started
             <ArrowRight />
           </Link>
         </Button>
+        <Button asChild variant="outline" size="lg">
+          <Link href="/login">Sign in</Link>
+        </Button>
       </div>
+      <Link
+        href="/style"
+        className="text-muted-foreground hover:text-foreground mt-6 text-xs"
+      >
+        View the design system →
+      </Link>
     </main>
   );
 }

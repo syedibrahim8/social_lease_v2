@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { LogOut, Settings } from "lucide-react";
 import { useAuth } from "@/lib/auth/auth-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,6 +21,7 @@ import type { Role } from "@/lib/api/types";
 /** Avatar dropdown — identity, the demo role switcher, settings, and sign out. */
 export function AccountMenu() {
   const { user, role, setRole } = useAuth();
+  const router = useRouter();
 
   return (
     <DropdownMenu>
@@ -60,7 +62,7 @@ export function AccountMenu() {
             Settings
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem variant="destructive">
+        <DropdownMenuItem variant="destructive" onClick={() => router.push("/login")}>
           <LogOut />
           Sign out
         </DropdownMenuItem>
