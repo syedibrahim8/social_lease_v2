@@ -5,9 +5,17 @@ import globals from 'globals';
 import prettier from 'eslint-config-prettier';
 
 export default tseslint.config(
-  // Ignore build artifacts and dependencies.
+  // Ignore build artifacts, dependencies, and the separate web/ frontend app
+  // (it has its own ESLint config + tsconfig; the backend's type-checked rules
+  // must not touch it).
   {
-    ignores: ['dist/**', 'node_modules/**', 'coverage/**', '*.config.mjs'],
+    ignores: [
+      'dist/**',
+      'node_modules/**',
+      'coverage/**',
+      'web/**',
+      '*.config.mjs',
+    ],
   },
 
   // Base JS + TypeScript recommended rules (type-checked).

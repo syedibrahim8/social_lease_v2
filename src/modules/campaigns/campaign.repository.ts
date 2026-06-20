@@ -1,6 +1,10 @@
-import type { FilterQuery } from 'mongoose';
+import { Types, type FilterQuery } from 'mongoose';
 import { CampaignModel } from '@/modules/campaigns/campaign.model';
-import type { ICampaign, ICampaignDocument } from '@/modules/campaigns/campaign.types';
+import type {
+  CampaignStatus,
+  ICampaign,
+  ICampaignDocument,
+} from '@/modules/campaigns/campaign.types';
 import type { PageParams } from '@/utils/pagination';
 import type { CreateCampaignDto } from '@/modules/campaigns/campaign.validators';
 
@@ -58,7 +62,20 @@ export const campaignRepository = {
     ]);
     return { items, total };
   },
+
+  /** Analytics: campaign counts grouped by status (optionally scoped to a brand). */
+  statusBreakdown(brandId?: string): Promise<CampaignStatRow[]> {
+    return CampaignModel.aggregate<CampaignStatRow>([
+      ...(brandId ? [{ $match: { brandId: new Types.ObjectId(brandId) } }] : []),
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+    ]);
+  },
 };
+
+export interface CampaignStatRow {
+  _id: CampaignStatus;
+  count: number;
+}
 
 export type CampaignRepository = typeof campaignRepository;
 export type { CampaignFilter };

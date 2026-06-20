@@ -68,6 +68,29 @@ export const walletRepository = {
       { new: true }
     ).exec();
   },
+
+  /** Analytics: summed balances across all creator wallets (platform-wide). */
+  async platformTotals(): Promise<{
+    totalEarned: number;
+    availableBalance: number;
+    pendingBalance: number;
+  }> {
+    const [row] = await WalletModel.aggregate<{
+      totalEarned: number;
+      availableBalance: number;
+      pendingBalance: number;
+    }>([
+      {
+        $group: {
+          _id: null,
+          totalEarned: { $sum: '$totalEarned' },
+          availableBalance: { $sum: '$availableBalance' },
+          pendingBalance: { $sum: '$pendingBalance' },
+        },
+      },
+    ]);
+    return row ?? { totalEarned: 0, availableBalance: 0, pendingBalance: 0 };
+  },
 };
 
 export type WalletRepository = typeof walletRepository;

@@ -1,6 +1,10 @@
-import type { FilterQuery } from 'mongoose';
+import { Types, type FilterQuery } from 'mongoose';
 import { ContractModel } from '@/modules/contracts/contract.model';
-import type { IContract, IContractDocument } from '@/modules/contracts/contract.types';
+import type {
+  ContractStatus,
+  IContract,
+  IContractDocument,
+} from '@/modules/contracts/contract.types';
 import type { PageParams } from '@/utils/pagination';
 
 const POPULATE = [
@@ -43,6 +47,30 @@ export const contractRepository = {
     return doc.save();
   },
 
+  /** Analytics: contract counts + agreed-price totals grouped by status. */
+  statusBreakdown(
+    scope: { brandId?: string; creatorId?: string } = {}
+  ): Promise<ContractStatRow[]> {
+    const match: Record<string, unknown> = {};
+    if (scope.brandId) match.brandId = new Types.ObjectId(scope.brandId);
+    if (scope.creatorId) match.creatorId = new Types.ObjectId(scope.creatorId);
+    return ContractModel.aggregate<ContractStatRow>([
+      { $match: match },
+      { $group: { _id: '$status', count: { $sum: 1 }, agreedPrice: { $sum: '$agreedPrice' } } },
+    ]);
+  },
+
+  /** Completed-contract counts per creator (recommendation "previous success"). */
+  async countCompletedByCreators(creatorIds: string[]): Promise<Map<string, number>> {
+    if (creatorIds.length === 0) return new Map();
+    const ids = creatorIds.map((id) => new Types.ObjectId(id));
+    const rows = await ContractModel.aggregate<{ _id: Types.ObjectId; count: number }>([
+      { $match: { creatorId: { $in: ids }, status: 'COMPLETED' } },
+      { $group: { _id: '$creatorId', count: { $sum: 1 } } },
+    ]);
+    return new Map(rows.map((row) => [row._id.toString(), row.count]));
+  },
+
   async list(
     filter: ContractFilter,
     { skip, limit }: PageParams
@@ -59,6 +87,12 @@ export const contractRepository = {
     return { items, total };
   },
 };
+
+export interface ContractStatRow {
+  _id: ContractStatus;
+  count: number;
+  agreedPrice: number;
+}
 
 export type ContractRepository = typeof contractRepository;
 export type { ContractFilter };

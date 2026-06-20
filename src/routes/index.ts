@@ -11,6 +11,8 @@ import { submissionRouter } from '@/modules/submissions/submission.routes';
 import { assetRouter } from '@/modules/assets/asset.routes';
 import { verificationRouter } from '@/modules/verifications/verification.routes';
 import { notificationRouter } from '@/modules/notifications/notification.routes';
+import { aiRouter } from '@/modules/ai/ai.routes';
+import { analyticsRouter } from '@/modules/analytics/analytics.routes';
 
 /**
  * Root API router. Every feature module registers its router here as it is
@@ -31,6 +33,8 @@ router.use('/submissions', submissionRouter);
 router.use('/assets', assetRouter);
 router.use('/verifications', verificationRouter);
 router.use('/notifications', notificationRouter);
+router.use('/ai', aiRouter);
+router.use('/analytics', analyticsRouter);
 
 // Future module routers are mounted here:
 // router.use('/reviews', reviewRouter);

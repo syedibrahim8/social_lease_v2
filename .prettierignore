@@ -1,5 +1,6 @@
 dist/
 node_modules/
 coverage/
+web/
 pnpm-lock.yaml
 *.log

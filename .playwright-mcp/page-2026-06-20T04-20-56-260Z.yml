@@ -1,0 +1,79 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e5]:
+        - img [ref=e7]
+        - generic [ref=e12]: Creator Market
+      - navigation [ref=e16]:
+        - generic [ref=e17]:
+          - paragraph [ref=e18]: Workspace
+          - link "Dashboard" [ref=e20] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e21]
+            - generic [ref=e26]: Dashboard
+          - link "Find campaigns" [ref=e28] [cursor=pointer]:
+            - /url: /marketplace
+            - img [ref=e29]
+            - generic [ref=e32]: Find campaigns
+          - link "Negotiations" [ref=e34] [cursor=pointer]:
+            - /url: /negotiations
+            - img [ref=e35]
+            - generic [ref=e38]: Negotiations
+          - link "My assets" [ref=e40] [cursor=pointer]:
+            - /url: /assets/mine
+            - img [ref=e41]
+            - generic [ref=e45]: My assets
+          - link "Wallet" [ref=e47] [cursor=pointer]:
+            - /url: /wallet
+            - img [ref=e48]
+            - generic [ref=e51]: Wallet
+          - link "Analytics" [ref=e53] [cursor=pointer]:
+            - /url: /analytics
+            - img [ref=e54]
+            - generic [ref=e56]: Analytics
+          - link "Verification" [ref=e58] [cursor=pointer]:
+            - /url: /verifications
+            - img [ref=e59]
+            - generic [ref=e62]: Verification
+        - generic [ref=e63]:
+          - paragraph [ref=e64]: Account
+          - link "Notifications" [ref=e66] [cursor=pointer]:
+            - /url: /notifications
+            - img [ref=e67]
+            - generic [ref=e70]: Notifications
+          - link "Settings" [ref=e72] [cursor=pointer]:
+            - /url: /settings
+            - img [ref=e73]
+            - generic [ref=e76]: Settings
+      - button "Collapse sidebar" [ref=e78]:
+        - img
+    - generic [ref=e79]:
+      - banner [ref=e80]:
+        - button "Search or jump to… ⌘K" [ref=e81]:
+          - img [ref=e82]
+          - generic [ref=e85]: Search or jump to…
+          - generic [ref=e86]: ⌘K
+        - generic [ref=e87]:
+          - button "Notifications, 3 unread" [ref=e88]:
+            - img
+            - generic [ref=e89]: "3"
+          - button "Toggle theme" [ref=e90]:
+            - img
+            - generic [ref=e91]: Toggle theme
+          - button "Account menu" [ref=e92]:
+            - generic [ref=e94]: MO
+      - main [ref=e95]:
+        - generic [ref=e96]:
+          - generic [ref=e98]:
+            - heading "Dashboard" [level=1] [ref=e99]
+            - paragraph [ref=e100]: Your workspace at a glance.
+          - generic [ref=e102]:
+            - img [ref=e104]
+            - heading "Layer 4 builds this screen" [level=3] [ref=e108]
+            - paragraph [ref=e109]: The app shell and navigation are live. This destination's interface arrives in its layer.
+    - generic [ref=e110]:
+      - heading "Command Palette" [level=2] [ref=e111]
+      - paragraph [ref=e112]: Search for a command to run...
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e118] [cursor=pointer]:
+    - img [ref=e119]

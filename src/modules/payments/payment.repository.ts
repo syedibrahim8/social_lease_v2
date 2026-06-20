@@ -1,6 +1,6 @@
-import type { FilterQuery } from 'mongoose';
+import { Types, type FilterQuery } from 'mongoose';
 import { PaymentModel } from '@/modules/payments/payment.model';
-import type { IPayment, IPaymentDocument } from '@/modules/payments/payment.types';
+import type { IPayment, IPaymentDocument, PaymentStatus } from '@/modules/payments/payment.types';
 import type { PageParams } from '@/utils/pagination';
 
 const POPULATE = [
@@ -64,7 +64,34 @@ export const paymentRepository = {
     ]);
     return { items, total };
   },
+
+  /** Analytics: payment totals grouped by status (optionally scoped to a party). */
+  statusBreakdown(scope: { brandId?: string; creatorId?: string } = {}): Promise<PaymentStatRow[]> {
+    const match: Record<string, unknown> = {};
+    if (scope.brandId) match.brandId = new Types.ObjectId(scope.brandId);
+    if (scope.creatorId) match.creatorId = new Types.ObjectId(scope.creatorId);
+    return PaymentModel.aggregate<PaymentStatRow>([
+      { $match: match },
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 },
+          amount: { $sum: '$amount' },
+          commission: { $sum: '$commissionAmount' },
+          creatorAmount: { $sum: '$creatorAmount' },
+        },
+      },
+    ]);
+  },
 };
+
+export interface PaymentStatRow {
+  _id: PaymentStatus;
+  count: number;
+  amount: number;
+  commission: number;
+  creatorAmount: number;
+}
 
 export type PaymentRepository = typeof paymentRepository;
 export type { PaymentFilter };

@@ -1,7 +1,10 @@
-import type { FilterQuery } from 'mongoose';
+import { Types, type FilterQuery } from 'mongoose';
 import { ApplicationModel } from '@/modules/applications/application.model';
 import type { AssetType } from '@/modules/campaigns/campaign.types';
-import type { IApplicationDocument } from '@/modules/applications/application.types';
+import type {
+  ApplicationStatus,
+  IApplicationDocument,
+} from '@/modules/applications/application.types';
 import type { PageParams } from '@/utils/pagination';
 
 const POPULATE = [
@@ -98,7 +101,25 @@ export const applicationRepository = {
     ]);
     return { items, total };
   },
+
+  /** Analytics: application counts grouped by status (scoped to a creator/brand). */
+  statusBreakdown(
+    scope: { creatorId?: string; brandId?: string } = {}
+  ): Promise<ApplicationStatRow[]> {
+    const match: Record<string, unknown> = {};
+    if (scope.creatorId) match.creatorId = new Types.ObjectId(scope.creatorId);
+    if (scope.brandId) match.brandId = new Types.ObjectId(scope.brandId);
+    return ApplicationModel.aggregate<ApplicationStatRow>([
+      { $match: match },
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+    ]);
+  },
 };
+
+export interface ApplicationStatRow {
+  _id: ApplicationStatus;
+  count: number;
+}
 
 export type ApplicationRepository = typeof applicationRepository;
 export type { ApplicationFilter };

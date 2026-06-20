@@ -1,4 +1,4 @@
-import type { FilterQuery } from 'mongoose';
+import { Types, type FilterQuery } from 'mongoose';
 import { SubmissionModel } from '@/modules/submissions/submission.model';
 import {
   ACTIVE_SUBMISSION_STATUSES,
@@ -6,6 +6,7 @@ import {
   type IDeliveryLink,
   type ISubmission,
   type ISubmissionDocument,
+  type SubmissionStatus,
 } from '@/modules/submissions/submission.types';
 import type { PageParams } from '@/utils/pagination';
 
@@ -16,6 +17,31 @@ const POPULATE = [
 ];
 
 type SubmissionFilter = FilterQuery<ISubmissionDocument>;
+
+export interface SubmissionStatRow {
+  _id: SubmissionStatus;
+  count: number;
+}
+
+export interface DeliveredAnalytics {
+  approvedCount: number;
+  impressions: number;
+  reach: number;
+  likes: number;
+  comments: number;
+  shares: number;
+  saves: number;
+}
+
+const EMPTY_DELIVERED: DeliveredAnalytics = {
+  approvedCount: 0,
+  impressions: 0,
+  reach: 0,
+  likes: 0,
+  comments: 0,
+  shares: 0,
+  saves: 0,
+};
 
 /** Insert shape — ids arrive as strings (Mongoose casts to ObjectId). */
 interface NewSubmission {
@@ -77,6 +103,44 @@ export const submissionRepository = {
       SubmissionModel.countDocuments(filter).exec(),
     ]);
     return { items, total };
+  },
+
+  /** Analytics: submission counts grouped by status (scoped to a creator/brand). */
+  statusBreakdown(
+    scope: { creatorId?: string; brandId?: string } = {}
+  ): Promise<SubmissionStatRow[]> {
+    const match: Record<string, unknown> = {};
+    if (scope.creatorId) match.creatorId = new Types.ObjectId(scope.creatorId);
+    if (scope.brandId) match.brandId = new Types.ObjectId(scope.brandId);
+    return SubmissionModel.aggregate<SubmissionStatRow>([
+      { $match: match },
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+    ]);
+  },
+
+  /** Analytics: summed self-reported performance over APPROVED deliveries. */
+  async deliveredAnalytics(
+    scope: { creatorId?: string; brandId?: string } = {}
+  ): Promise<DeliveredAnalytics> {
+    const match: Record<string, unknown> = { status: 'APPROVED' };
+    if (scope.creatorId) match.creatorId = new Types.ObjectId(scope.creatorId);
+    if (scope.brandId) match.brandId = new Types.ObjectId(scope.brandId);
+    const [row] = await SubmissionModel.aggregate<DeliveredAnalytics>([
+      { $match: match },
+      {
+        $group: {
+          _id: null,
+          approvedCount: { $sum: 1 },
+          impressions: { $sum: { $ifNull: ['$analytics.impressions', 0] } },
+          reach: { $sum: { $ifNull: ['$analytics.reach', 0] } },
+          likes: { $sum: { $ifNull: ['$analytics.likes', 0] } },
+          comments: { $sum: { $ifNull: ['$analytics.comments', 0] } },
+          shares: { $sum: { $ifNull: ['$analytics.shares', 0] } },
+          saves: { $sum: { $ifNull: ['$analytics.saves', 0] } },
+        },
+      },
+    ]);
+    return row ?? EMPTY_DELIVERED;
   },
 };
 

@@ -1,0 +1,302 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/*
+ * Creator Asset Marketplace — Design Tokens
+ * --------------------------------------------------------------------------
+ * All theme-aware values are CSS variables defined on :root (light) and
+ * .dark (dark). Tailwind v4 maps them to utilities via @theme inline, so
+ * `bg-card`, `text-muted-foreground`, `bg-brand`, `text-success-text`, etc.
+ * all resolve and flip with the theme. Dark mode is the `.dark` class on
+ * <html> (driven by next-themes). Values come from the design spec.
+ */
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* Fonts (variables set on <html> in layout.tsx via next/font) */
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-geist-sans);
+
+  /* Core surface + control tokens (consumed by shadcn primitives) */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Sidebar (app shell — used from L1 onward) */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Brand — emerald accent. `brand` = fill, `brand-text` = accessible text,
+     `brand-muted` = subtle tint background. Plus the raw scale. */
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-brand-muted: var(--brand-muted);
+  --color-brand-text: var(--brand-text);
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+
+  /* Semantic — each has solid (dot/icon), muted (badge bg), text (on muted) */
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-muted: var(--success-muted);
+  --color-success-text: var(--success-text);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-muted: var(--warning-muted);
+  --color-warning-text: var(--warning-text);
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-danger-muted: var(--danger-muted);
+  --color-danger-text: var(--danger-text);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-muted: var(--info-muted);
+  --color-info-text: var(--info-text);
+
+  /* Charts (used from L4/L9) — restrained, no purple/neon */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Radius — base 10px (lg); sm 6 · md 8 · lg 10 · xl 12 · 2xl 16 */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 2px);
+  --radius-2xl: calc(var(--radius) + 6px);
+
+  /* Shadows — soft, border-led (Stripe/Mercury restraint) */
+  --shadow-xs: 0 1px 2px 0 rgb(16 24 40 / 0.04);
+  --shadow-sm: 0 1px 3px 0 rgb(16 24 40 / 0.06), 0 1px 2px -1px rgb(16 24 40 / 0.04);
+  --shadow-md: 0 4px 8px -2px rgb(16 24 40 / 0.06), 0 2px 4px -2px rgb(16 24 40 / 0.04);
+  --shadow-lg: 0 12px 24px -6px rgb(16 24 40 / 0.10);
+  --shadow-xl: 0 20px 32px -8px rgb(16 24 40 / 0.12);
+
+  /* Motion easing (Linear glide) */
+  --ease-out-quint: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root {
+  --radius: 0.625rem; /* 10px */
+
+  /* Surfaces (light) */
+  --background: #fafafa;
+  --foreground: #111827;
+  --card: #ffffff;
+  --card-foreground: #111827;
+  --popover: #ffffff;
+  --popover-foreground: #111827;
+
+  /* Controls (light) */
+  --primary: #111827; /* gray-900 — primary action */
+  --primary-foreground: #ffffff;
+  --secondary: #f4f5f7;
+  --secondary-foreground: #111827;
+  --muted: #f4f5f7;
+  --muted-foreground: #6b7280;
+  --accent: #f4f5f7; /* neutral hover/active surface (shadcn semantics) */
+  --accent-foreground: #111827;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --ring: #10b981; /* emerald focus ring */
+
+  /* Brand — emerald (light) */
+  --brand: #059669; /* emerald-600 fill, white text passes */
+  --brand-foreground: #ffffff;
+  --brand-muted: #ecfdf5; /* emerald-50 */
+  --brand-text: #047857; /* emerald-700 — accessible on light */
+  --brand-50: #ecfdf5;
+  --brand-100: #d1fae5;
+  --brand-500: #10b981;
+  --brand-600: #059669;
+  --brand-700: #047857;
+
+  /* Semantic (light) */
+  --success: #22c55e;
+  --success-foreground: #ffffff;
+  --success-muted: #dcfce7;
+  --success-text: #15803d;
+  --warning: #f59e0b;
+  --warning-foreground: #ffffff;
+  --warning-muted: #fef3c7;
+  --warning-text: #b45309;
+  --danger: #ef4444;
+  --danger-foreground: #ffffff;
+  --danger-muted: #fee2e2;
+  --danger-text: #b91c1c;
+  --info: #3b82f6;
+  --info-foreground: #ffffff;
+  --info-muted: #dbeafe;
+  --info-text: #1d4ed8;
+
+  /* Charts (light) */
+  --chart-1: #10b981;
+  --chart-2: #0ea5e9;
+  --chart-3: #f59e0b;
+  --chart-4: #6b7280;
+  --chart-5: #14b8a6;
+
+  /* Sidebar (light) */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #111827;
+  --sidebar-primary: #111827;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f4f5f7;
+  --sidebar-accent-foreground: #111827;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #10b981;
+}
+
+.dark {
+  /* Surfaces (dark) */
+  --background: #0b0f19;
+  --foreground: #fafafa;
+  --card: #111827;
+  --card-foreground: #fafafa;
+  --popover: #111827;
+  --popover-foreground: #fafafa;
+
+  /* Controls (dark) — primary inverts to a light chip on dark */
+  --primary: #fafafa;
+  --primary-foreground: #111827;
+  --secondary: #161b26;
+  --secondary-foreground: #fafafa;
+  --muted: #161b26;
+  --muted-foreground: #9ca3af;
+  --accent: #1f2937;
+  --accent-foreground: #fafafa;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #1f2937;
+  --input: #262c3a;
+  --ring: #34d399;
+
+  /* Brand (dark) */
+  --brand: #059669;
+  --brand-foreground: #ffffff;
+  --brand-muted: rgb(16 185 129 / 0.15);
+  --brand-text: #34d399; /* emerald-400 — accessible on dark */
+  --brand-50: #052e21;
+  --brand-100: #064e3b;
+  --brand-500: #10b981;
+  --brand-600: #34d399;
+  --brand-700: #6ee7b7;
+
+  /* Semantic (dark) — tints become translucent, text lightens */
+  --success: #22c55e;
+  --success-foreground: #052e16;
+  --success-muted: rgb(34 197 94 / 0.15);
+  --success-text: #4ade80;
+  --warning: #f59e0b;
+  --warning-foreground: #1f1300;
+  --warning-muted: rgb(245 158 11 / 0.15);
+  --warning-text: #fbbf24;
+  --danger: #ef4444;
+  --danger-foreground: #ffffff;
+  --danger-muted: rgb(239 68 68 / 0.15);
+  --danger-text: #f87171;
+  --info: #3b82f6;
+  --info-foreground: #ffffff;
+  --info-muted: rgb(59 130 246 / 0.15);
+  --info-text: #60a5fa;
+
+  /* Charts (dark) */
+  --chart-1: #34d399;
+  --chart-2: #38bdf8;
+  --chart-3: #fbbf24;
+  --chart-4: #9ca3af;
+  --chart-5: #2dd4bf;
+
+  /* Sidebar (dark) */
+  --sidebar: #0b0f19;
+  --sidebar-foreground: #fafafa;
+  --sidebar-primary: #fafafa;
+  --sidebar-primary-foreground: #111827;
+  --sidebar-accent: #161b26;
+  --sidebar-accent-foreground: #fafafa;
+  --sidebar-border: #1f2937;
+  --sidebar-ring: #34d399;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply font-sans;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-size: 0.875rem; /* 14px app base */
+    line-height: 1.5;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "cv11", "ss01";
+  }
+
+  /* Tight tracking on large headings (Linear/Stripe feel) */
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--brand) 20%, transparent);
+  }
+
+  /* Tabular, monospaced figures for money / IDs / metrics */
+  .tabular {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+}
+
+/* Respect reduced-motion globally */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

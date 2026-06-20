@@ -115,6 +115,16 @@ export const userRepository = {
       { new: true }
     ).exec();
   },
+
+  /** Analytics: user counts grouped by role. */
+  async countByRole(): Promise<Record<UserRole, number>> {
+    const rows = await UserModel.aggregate<{ _id: UserRole; count: number }>([
+      { $group: { _id: '$role', count: { $sum: 1 } } },
+    ]);
+    const out: Record<UserRole, number> = { CREATOR: 0, BRAND: 0, ADMIN: 0 };
+    for (const row of rows) out[row._id] = row.count;
+    return out;
+  },
 };
 
 export type UserRepository = typeof userRepository;
