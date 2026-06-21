@@ -1,14 +1,10 @@
-import type { Metadata } from "next";
-import { RoutePlaceholder } from "@/components/layout/route-placeholder";
+"use client";
 
-export const metadata: Metadata = { title: "Wallet" };
+import { useAuth } from "@/lib/auth/auth-provider";
+import { CreatorWalletView } from "@/components/wallet/creator-wallet";
+import { BrandWalletView } from "@/components/wallet/brand-wallet";
 
 export default function WalletPage() {
-  return (
-    <RoutePlaceholder
-      title="Wallet"
-      description="Balances, payouts, and your transaction ledger."
-      layer="Layer 8"
-    />
-  );
+  const { role } = useAuth();
+  return role === "BRAND" ? <BrandWalletView /> : <CreatorWalletView />;
 }
