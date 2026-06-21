@@ -34,3 +34,8 @@ Thumbs.db
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# Local verification artifacts (screenshots, Playwright snapshots)
+.playwright-mcp/
+/l*.png
+/style*.png
