@@ -20,7 +20,7 @@ import type { Role } from "@/lib/api/types";
 
 /** Avatar dropdown — identity, the demo role switcher, settings, and sign out. */
 export function AccountMenu() {
-  const { user, role, setRole } = useAuth();
+  const { user, role, setRole, isMock, logout } = useAuth();
   const router = useRouter();
 
   return (
@@ -43,18 +43,22 @@ export function AccountMenu() {
           <p className="truncate text-sm font-medium">{user.name}</p>
           <p className="text-muted-foreground truncate text-xs">{user.email}</p>
         </div>
-        <DropdownMenuSeparator />
-        <DropdownMenuLabel className="text-muted-foreground text-xs font-normal">
-          Switch role (demo)
-        </DropdownMenuLabel>
-        <DropdownMenuRadioGroup
-          value={role}
-          onValueChange={(value) => setRole(value as Role)}
-        >
-          <DropdownMenuRadioItem value="CREATOR">Creator</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="BRAND">Brand</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="ADMIN">Admin</DropdownMenuRadioItem>
-        </DropdownMenuRadioGroup>
+        {isMock ? (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel className="text-muted-foreground text-xs font-normal">
+              Switch role (demo)
+            </DropdownMenuLabel>
+            <DropdownMenuRadioGroup
+              value={role}
+              onValueChange={(value) => setRole(value as Role)}
+            >
+              <DropdownMenuRadioItem value="CREATOR">Creator</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="BRAND">Brand</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="ADMIN">Admin</DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </>
+        ) : null}
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link href="/settings">
@@ -62,7 +66,13 @@ export function AccountMenu() {
             Settings
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem variant="destructive" onClick={() => router.push("/login")}>
+        <DropdownMenuItem
+          variant="destructive"
+          onClick={async () => {
+            await logout();
+            router.push("/login");
+          }}
+        >
           <LogOut />
           Sign out
         </DropdownMenuItem>

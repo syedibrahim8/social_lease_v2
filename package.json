@@ -19,6 +19,8 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{ts,js,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,js,json,md}\"",
+    "seed:demo": "tsx scripts/seed-demo.ts",
+    "unseed:demo": "tsx scripts/seed-demo.ts --clean",
     "prepare": "husky"
   },
   "dependencies": {

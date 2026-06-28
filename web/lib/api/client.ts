@@ -1,10 +1,10 @@
 import type { ApiErrorShape, ApiFieldError, ApiMeta } from "./types";
 
 /**
- * Typed fetch wrapper over the backend's response envelopes. Used on the LIVE
- * path (the mock adapter short-circuits before this in earlier layers). The
- * access token is injected per-request via `getAccessToken`; the refresh
- * cookie is sent automatically because of `credentials: "include"`.
+ * Typed fetch wrapper over the backend's response envelopes. The access token is
+ * injected per-request from the AuthProvider via `getAccessToken`; the refresh
+ * cookie rides along because of `credentials: "include"`. On a 401 it asks the
+ * registered refresh handler for a new token and retries the request once.
  */
 
 export const API_BASE_URL =
@@ -24,10 +24,16 @@ export class ApiError extends Error {
 }
 
 let accessTokenGetter: () => string | null = () => null;
+let refreshHandler: (() => Promise<string | null>) | null = null;
 
-/** Wire the in-memory access token source (set by the AuthProvider, live phase). */
+/** Wire the in-memory access token source (set by the AuthProvider). */
 export function setAccessTokenGetter(getter: () => string | null): void {
   accessTokenGetter = getter;
+}
+
+/** Wire the 401 → refresh handler (returns a new access token or null). */
+export function setRefreshHandler(handler: (() => Promise<string | null>) | null): void {
+  refreshHandler = handler;
 }
 
 export interface ApiResult<T> {
@@ -38,6 +44,7 @@ export interface ApiResult<T> {
 export async function apiFetch<T>(
   path: string,
   init: RequestInit = {},
+  retried = false,
 ): Promise<ApiResult<T>> {
   const token = accessTokenGetter();
   const res = await fetch(`${API_BASE_URL}${path}`, {
@@ -49,6 +56,11 @@ export async function apiFetch<T>(
       ...init.headers,
     },
   });
+
+  if (res.status === 401 && !retried && refreshHandler && !path.startsWith("/auth/")) {
+    const next = await refreshHandler();
+    if (next) return apiFetch<T>(path, init, true);
+  }
 
   let json: unknown = null;
   try {

@@ -78,7 +78,7 @@ export function CreatorWalletView() {
                 icon={<TrendingUp className="size-4" />}
               />
             </div>
-            <ConnectStatusCard wallet={w} />
+            <ConnectStatusCard />
           </div>
         )}
       </QueryBoundary>

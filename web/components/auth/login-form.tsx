@@ -9,21 +9,30 @@ import { loginSchema, type LoginValues } from "@/lib/validations/auth";
 import { Field } from "@/components/forms/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { mockDelay } from "@/lib/api/adapter";
+import { useAuth } from "@/lib/auth/auth-provider";
 
 export function LoginForm() {
   const router = useRouter();
+  const { login } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginValues>({ resolver: zodResolver(loginSchema), mode: "onTouched" });
 
-  const onSubmit = async () => {
+  const onSubmit = async (values: LoginValues) => {
     setLoading(true);
-    await mockDelay(500);
-    router.push("/dashboard");
+    setError(null);
+    try {
+      await login(values.email, values.password);
+      router.push("/dashboard");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not sign in. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -56,6 +65,11 @@ export function LoginForm() {
           Forgot password?
         </Link>
       </div>
+      {error ? (
+        <p className="bg-danger-muted text-danger-text rounded-lg px-3 py-2 text-sm">
+          {error}
+        </p>
+      ) : null}
       <Button
         type="submit"
         variant="brand"

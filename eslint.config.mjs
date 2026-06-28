@@ -14,6 +14,9 @@ export default tseslint.config(
       'node_modules/**',
       'coverage/**',
       'web/**',
+      // Standalone dev scripts (run via tsx, not part of the build's tsconfig
+      // project) — the type-checked rules can't resolve type info for them.
+      'scripts/**',
       '*.config.mjs',
     ],
   },

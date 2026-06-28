@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { mockDelay } from "@/lib/api/adapter";
 import { cn } from "@/lib/utils";
 
 const roleOptions = [
@@ -21,8 +20,9 @@ const roleOptions = [
 
 export function RegisterForm() {
   const router = useRouter();
-  const { setRole } = useAuth();
+  const { register: registerUser, isMock } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const {
     register,
     control,
@@ -36,9 +36,25 @@ export function RegisterForm() {
 
   const onSubmit = async (values: RegisterValues) => {
     setLoading(true);
-    await mockDelay(500);
-    setRole(values.role);
-    router.push(`/onboarding/${values.role.toLowerCase()}`);
+    setError(null);
+    try {
+      await registerUser({
+        name: values.name,
+        email: values.email,
+        password: values.password,
+        role: values.role,
+      });
+      // Manual signups must verify their email first; mock/demo skips straight to onboarding.
+      if (isMock) {
+        router.push(`/onboarding/${values.role.toLowerCase()}`);
+      } else {
+        router.push("/verify-email");
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not create your account.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -113,6 +129,11 @@ export function RegisterForm() {
         />
       </Field>
 
+      {error ? (
+        <p className="bg-danger-muted text-danger-text rounded-lg px-3 py-2 text-sm">
+          {error}
+        </p>
+      ) : null}
       <Button
         type="submit"
         variant="brand"

@@ -1,17 +1,13 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { CreditCard, Plus } from "lucide-react";
 import { useAuth } from "@/lib/auth/auth-provider";
-import { getCreatorWallet } from "@/lib/api/endpoints/wallet";
 import { ConnectStatusCard } from "@/components/wallet/connect-status-card";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 
 function CreatorPayoutSettings() {
-  const wallet = useQuery({ queryKey: ["wallet", "creator"], queryFn: getCreatorWallet });
   return (
     <div className="max-w-xl space-y-4">
       <div>
@@ -20,11 +16,7 @@ function CreatorPayoutSettings() {
           Your Stripe Connect account receives escrow-released payouts.
         </p>
       </div>
-      {wallet.isPending ? (
-        <Skeleton className="h-20 w-full" />
-      ) : wallet.data ? (
-        <ConnectStatusCard wallet={wallet.data} />
-      ) : null}
+      <ConnectStatusCard />
     </div>
   );
 }

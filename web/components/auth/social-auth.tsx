@@ -1,7 +1,17 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import { toast } from "sonner";
+import {
+  GoogleLogin,
+  GoogleOAuthProvider,
+  type CredentialResponse,
+} from "@react-oauth/google";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth/auth-provider";
+
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
 function GoogleIcon() {
   return (
@@ -26,29 +36,75 @@ function GoogleIcon() {
   );
 }
 
-/** Google button + divider. Mock-wired until Google OAuth is configured. */
+function Divider() {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="bg-border h-px flex-1" />
+      <span className="text-muted-foreground text-xs">or</span>
+      <span className="bg-border h-px flex-1" />
+    </div>
+  );
+}
+
+/** Real Google Sign-In when NEXT_PUBLIC_GOOGLE_CLIENT_ID is set; styled fallback otherwise. */
 export function SocialAuth({ label = "Continue with Google" }: { label?: string }) {
+  const router = useRouter();
+  const { resolvedTheme } = useTheme();
+  const { google } = useAuth();
+
+  if (!GOOGLE_CLIENT_ID) {
+    return (
+      <div className="space-y-4">
+        <Button
+          type="button"
+          variant="outline"
+          size="lg"
+          className="w-full"
+          onClick={() =>
+            toast.message("Google sign-in", {
+              description: "Set NEXT_PUBLIC_GOOGLE_CLIENT_ID to enable it.",
+            })
+          }
+        >
+          <GoogleIcon />
+          {label}
+        </Button>
+        <Divider />
+      </div>
+    );
+  }
+
+  const onSuccess = async (cred: CredentialResponse) => {
+    if (!cred.credential) {
+      toast.error("Google sign-in failed", { description: "No credential returned." });
+      return;
+    }
+    try {
+      await google(cred.credential);
+      router.push("/dashboard");
+    } catch (e) {
+      toast.error("Google sign-in failed", {
+        description: e instanceof Error ? e.message : "Please try again.",
+      });
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <Button
-        type="button"
-        variant="outline"
-        size="lg"
-        className="w-full"
-        onClick={() =>
-          toast.message("Google sign-in", {
-            description: "Available once Google OAuth is configured.",
-          })
-        }
-      >
-        <GoogleIcon />
-        {label}
-      </Button>
-      <div className="flex items-center gap-3">
-        <span className="bg-border h-px flex-1" />
-        <span className="text-muted-foreground text-xs">or</span>
-        <span className="bg-border h-px flex-1" />
-      </div>
+      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+        <div className="flex justify-center">
+          <GoogleLogin
+            onSuccess={onSuccess}
+            onError={() => toast.error("Google sign-in failed")}
+            theme={resolvedTheme === "dark" ? "filled_black" : "outline"}
+            size="large"
+            text="continue_with"
+            shape="rectangular"
+            width="320"
+          />
+        </div>
+      </GoogleOAuthProvider>
+      <Divider />
     </div>
   );
 }
