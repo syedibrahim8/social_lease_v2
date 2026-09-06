@@ -279,6 +279,16 @@ export const paymentService = {
       currency: payment.currency,
       description: `Escrow reversed (refund) for contract ${contractId}`,
     });
+    // The brand gets the gross charge back, commission included.
+    await transactionRepository.create({
+      userId: payment.brandId,
+      paymentId: payment._id,
+      contractId: contract._id,
+      type: 'REFUND',
+      amount: payment.amount,
+      currency: payment.currency,
+      description: `Refund received for contract ${contractId}`,
+    });
 
     contract.status = 'CANCELLED';
     await contractRepository.save(contract);
@@ -336,6 +346,18 @@ export const paymentService = {
       contractId: payment.contractId,
       type: 'EARNING',
       amount: payment.creatorAmount,
+      currency: payment.currency,
+      description: `Escrow funded for contract ${payment.contractId.toString()}`,
+    });
+    // The brand's mirror of the same movement. Uses the GROSS amount — what the
+    // brand actually paid — so the two sides of the ledger differ by exactly the
+    // platform commission.
+    await transactionRepository.create({
+      userId: payment.brandId,
+      paymentId: payment._id,
+      contractId: payment.contractId,
+      type: 'SPEND',
+      amount: -payment.amount,
       currency: payment.currency,
       description: `Escrow funded for contract ${payment.contractId.toString()}`,
     });

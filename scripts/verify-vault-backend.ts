@@ -19,6 +19,7 @@ import { CampaignModel } from '@/modules/campaigns/campaign.model';
 import { ContractModel } from '@/modules/contracts/contract.model';
 import { PaymentModel } from '@/modules/payments/payment.model';
 import { TransactionModel } from '@/modules/payments/transaction.model';
+import { WalletModel } from '@/modules/payments/wallet.model';
 import { paymentService } from '@/modules/payments/payment.service';
 import type { ContractStatus } from '@/modules/contracts/contract.types';
 import type { PaymentStatus } from '@/modules/payments/payment.types';
@@ -150,6 +151,7 @@ async function seedChain(
 
 async function cleanup(): Promise<void> {
   await Promise.all([
+    WalletModel.deleteMany({ userId: { $in: created.users } }),
     TransactionModel.deleteMany({ paymentId: { $in: created.payments } }),
     PaymentModel.deleteMany({ _id: { $in: created.payments } }),
     ContractModel.deleteMany({ _id: { $in: created.contracts } }),
@@ -180,6 +182,37 @@ async function main(): Promise<void> {
     // The payment must be untouched by the rejected attempt.
     const after = await PaymentModel.findById(approved.paymentId).lean();
     check('a rejected refund leaves the payment PAID', after?.status === 'PAID');
+
+    // ── §8.2 — funding must write a brand-side ledger row as well as the
+    // creator's. Drive the webhook handler directly; going through Stripe would
+    // need a hosted Checkout session a script can't complete.
+    const funded = await seedChain('brand-ledger', 'PENDING_FUNDING', 'PENDING');
+    await paymentService.handleCheckoutCompleted({
+      id: 'cs_test_vault_verification',
+      metadata: { paymentId: funded.paymentId, contractId: funded.contractId },
+      payment_intent: 'pi_vault_verification_funded',
+    } as unknown as Parameters<typeof paymentService.handleCheckoutCompleted>[0]);
+
+    const brandRows = await TransactionModel.find({ userId: funded.brandId }).lean();
+    check('funding writes exactly one brand ledger row', brandRows.length === 1);
+    check('the brand row is a SPEND', brandRows[0]?.type === 'SPEND');
+    check(
+      'the brand row is the negative GROSS amount (commission included)',
+      brandRows[0]?.amount === -funded.grossAmount
+    );
+    logger.info(`      ↳ brand row: ${brandRows[0]?.type} ${String(brandRows[0]?.amount)}`);
+
+    const creatorRows = await TransactionModel.find({ userId: funded.creatorId }).lean();
+    check('the creator row is still an EARNING', creatorRows[0]?.type === 'EARNING');
+    check(
+      'the creator row still uses creatorAmount, not gross',
+      creatorRows[0]?.amount === funded.creatorAmount
+    );
+    logger.info(`      ↳ creator row: ${creatorRows[0]?.type} ${String(creatorRows[0]?.amount)}`);
+    check(
+      'the two sides differ by exactly the commission',
+      (brandRows[0]?.amount ?? 0) + (creatorRows[0]?.amount ?? 0) === -funded.commissionAmount
+    );
   } finally {
     await cleanup();
     await disconnectDatabase();
