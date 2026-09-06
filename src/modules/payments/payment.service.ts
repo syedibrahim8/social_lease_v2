@@ -246,6 +246,14 @@ export const paymentService = {
     if (contract.brandId.toString() !== brandUserId) {
       throw ApiError.forbidden('Only the contract owner can request a refund');
     }
+    // Proof of work was already accepted. The payout may still be sitting in
+    // escrow (auto-release defers when the creator isn't payout-onboarded yet),
+    // but the brand no longer gets to take the money back — it must be released.
+    if (contract.status === 'APPROVED') {
+      throw ApiError.conflict(
+        'This delivery was approved; the payout must be released, not refunded'
+      );
+    }
 
     const payment = await paymentRepository.findByContractId(contractId);
     if (!payment || payment.status !== 'PAID') {
