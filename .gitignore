@@ -39,3 +39,6 @@ Thumbs.db
 .playwright-mcp/
 /l*.png
 /style*.png
+
+# Brainstorming visual companion
+.superpowers/
