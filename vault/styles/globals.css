@@ -1,1 +1,190 @@
 @import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   VAULT — design tokens
+   ---------------------------------------------------------------------------
+   Dark-only by deliberate commitment. There is no light theme and no toggle;
+   tokens still live on :root so one could be added later without restructuring.
+
+   Every foreground value below was measured against every surface with a WCAG
+   contrast script before being committed. The neutral ramp is defined by what
+   actually passes, not by what looked right:
+
+                  ink    surface  surface-2  emerald
+     bone        16.30    14.76     13.81     11.71   primary text
+     bone-2      10.65     9.65      9.03      7.65   secondary text
+     muted        6.44     5.83      5.46      4.63   tertiary text — AA floor
+     faint        3.36     3.04      2.85      2.41   NON-TEXT ONLY
+
+   `faint` fails AA on every surface. That is intentional and it is not a text
+   colour: hairlines, inactive tracker dots, disabled glyph fills. If you are
+   about to set `color: var(--color-faint)` on something a person reads, use
+   `muted` instead.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@theme {
+  /* ── Surfaces, darkest to lightest ────────────────────────────────────── */
+  --color-ink: #080b0a;
+  --color-ink-2: #0a0f0d;
+  --color-surface: #101917;
+  --color-surface-2: #14201d;
+  --color-emerald-deep: #123028;
+  --color-emerald-lo: #0e211c;
+
+  /* ── Gold. Rationed: money, and the one primary action per screen. ────── */
+  --color-gold: #c9a227;
+  --color-gold-lo: #d9b84a;
+  --color-gold-hi: #f0d67a;
+
+  /* ── Text ramp (see contrast table above) ─────────────────────────────── */
+  --color-bone: #ede9df;
+  --color-bone-2: #b9c0bb;
+  --color-muted: #8a9690;
+  --color-faint: #5c6762;
+
+  /* ── Semantic. Each is paired with an icon or text in use — never colour
+        alone, since red/green is exactly what a deuteranope cannot split. ── */
+  --color-positive: #4ade80;
+  --color-negative: #f87171;
+  --color-warning: #e0a33e;
+  --color-info: #6ba8c9;
+
+  /* ── Lines. Gold hairline for money surfaces, bone for everything else. ─ */
+  --color-line: color-mix(in oklab, #c9a227 16%, transparent);
+  --color-line-2: color-mix(in oklab, #ede9df 9%, transparent);
+
+  /* ── Type: three voices, never mixed within one context. ──────────────── */
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-playfair), Georgia, "Times New Roman", serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* ── Radii ────────────────────────────────────────────────────────────── */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 13px;
+  --radius-2xl: 16px;
+
+  /* ── Elevation. On dark, depth reads as glow and border, not drop shadow.
+        The gold shadow is reserved for the primary money action. ────────── */
+  --shadow-gold: 0 6px 20px color-mix(in oklab, #c9a227 28%, transparent);
+  --shadow-lift: 0 12px 32px rgb(0 0 0 / 0.45);
+
+  /* ── Motion tokens. Consumed by lib/motion.ts so CSS and JS animations
+        share one rhythm. ──────────────────────────────────────────────────*/
+  --ease-out-vault: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 180ms;
+  --duration-base: 320ms;
+  --duration-money: 900ms;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Base
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  /* Lenis drives scrolling; native smooth-scroll would fight it. */
+  scroll-behavior: auto;
+}
+
+body {
+  background-color: var(--color-ink);
+  color: var(--color-bone);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Focus is never removed. 2px at 2px offset, gold — 8.17:1 on ink, well past
+   the 3:1 the WCAG 2.2 focus-appearance criterion asks for. */
+:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+::selection {
+  background-color: color-mix(in oklab, var(--color-gold) 30%, transparent);
+  color: var(--color-bone);
+}
+
+/* Dark scrollbars — a light default track is the loudest possible tell that a
+   dark theme was bolted on. */
+* {
+  scrollbar-color: var(--color-faint) transparent;
+  scrollbar-width: thin;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Utilities
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Every figure in a table, row, stat or badge. Tabular so digits never change
+   column width as values update — a ledger that shifts while you read it is
+   worse than a slow one. */
+@utility tnum {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Wide content (ledgers, offer threads) scrolls inside its own container so the
+   page body never scrolls sideways. */
+@utility scroll-x {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+/* The sheen that marks a gold action. Slow enough never to nag. */
+@utility sheen {
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 38%,
+      color-mix(in oklab, white 42%, transparent) 50%,
+      transparent 62%
+    );
+    transform: translateX(-120%);
+    animation: vault-sheen 3.4s ease-in-out infinite;
+    pointer-events: none;
+  }
+}
+
+@keyframes vault-sheen {
+  0%,
+  62% {
+    transform: translateX(-120%);
+  }
+  82%,
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Reduced motion — the whole system degrades to static, never to broken.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
