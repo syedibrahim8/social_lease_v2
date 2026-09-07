@@ -8,6 +8,63 @@
 
 export type Role = "CREATOR" | "BRAND" | "ADMIN";
 
+/* ── Envelopes ────────────────────────────────────────────────────────────────
+   Every endpoint returns exactly one of these two shapes.                     */
+
+export interface ApiMeta {
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+/** `field` is absent on errors that aren't tied to one input. */
+export interface ApiFieldError {
+  field?: string;
+  message: string;
+}
+
+export interface SuccessBody<T> {
+  success: true;
+  message: string;
+  data: T;
+  meta?: ApiMeta;
+}
+
+export interface ErrorBody {
+  success: false;
+  message: string;
+  errors: ApiFieldError[];
+}
+
+/** A page of results plus its pagination meta. */
+export interface Paginated<T> {
+  items: T[];
+  meta?: ApiMeta;
+}
+
+/* ── Auth ─────────────────────────────────────────────────────────────────── */
+
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  provider: "LOCAL" | "GOOGLE";
+  isVerified: boolean;
+  avatar?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** The refresh token is NOT here — it is an httpOnly cookie. */
+export interface Session {
+  user: AuthUser;
+  accessToken: string;
+}
+
 /* ── Campaign ─────────────────────────────────────────────────────────────── */
 
 export const CAMPAIGN_STATUSES = [
@@ -81,4 +138,202 @@ export interface Transaction {
   status: "PENDING" | "COMPLETED" | "FAILED";
   description: string;
   createdAt: string;
+}
+
+export interface Payment {
+  id: string;
+  contractId: string;
+  campaignId: string;
+  brandId: string;
+  creatorId: string;
+  /** Gross, minor units — what the brand paid. */
+  amount: number;
+  /** Platform fee, minor units. Frozen at checkout. */
+  commissionAmount: number;
+  /** amount − commission, minor units. What the creator receives. */
+  creatorAmount: number;
+  currency: string;
+  status: PaymentStatus;
+  paidAt?: string;
+  releasedAt?: string;
+  refundedAt?: string;
+  createdAt: string;
+}
+
+export interface Wallet {
+  id: string;
+  userId: string;
+  currency: string;
+  /** Held in escrow for contracts not yet released. Minor units. */
+  pendingBalance: number;
+  /** Released to the creator; lives in Stripe. Minor units. */
+  availableBalance: number;
+  totalEarned: number;
+  stripeAccountId?: string;
+  payoutsEnabled: boolean;
+  onboardingComplete: boolean;
+}
+
+export interface ConnectStatus {
+  hasAccount: boolean;
+  onboardingComplete: boolean;
+  payoutsEnabled: boolean;
+}
+
+/* ── Contract (full shape) ────────────────────────────────────────────────── */
+
+export interface Deliverable {
+  description: string;
+  completed: boolean;
+}
+
+export interface Contract {
+  id: string;
+  applicationId: string;
+  campaignId: string;
+  brandId: string;
+  creatorId: string;
+  assetType: AssetType;
+  platform: Platform;
+  /** Minor units. The agreed price from the accepted offer. */
+  agreedPrice: number;
+  currency: string;
+  deliverables: Deliverable[];
+  timeline: { durationDays: number; startDate?: string; endDate?: string };
+  status: ContractStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/* ── Campaign ─────────────────────────────────────────────────────────────── */
+
+export interface Campaign {
+  id: string;
+  brandId: string;
+  title: string;
+  description: string;
+  assetType: AssetType;
+  platform: Platform;
+  duration: number;
+  /** Minor units. */
+  budgetMin: number;
+  budgetMax: number;
+  currency: string;
+  requirements: string[];
+  status: CampaignStatus;
+  publishedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/* ── Applications & negotiation ───────────────────────────────────────────── */
+
+export const APPLICATION_STATUSES = [
+  "PENDING",
+  "NEGOTIATING",
+  "ACCEPTED",
+  "REJECTED",
+  "WITHDRAWN",
+] as const;
+export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
+
+export type OfferStatus = "PENDING" | "ACCEPTED" | "REJECTED" | "COUNTERED";
+
+export interface Offer {
+  _id?: string;
+  senderId: string;
+  receiverId: string;
+  /** Minor units. */
+  amount: number;
+  message?: string;
+  status: OfferStatus;
+  createdAt: string;
+}
+
+export interface Application {
+  id: string;
+  campaignId: string;
+  creatorId: string;
+  brandId: string;
+  assetType: AssetType;
+  /** Minor units. */
+  proposedPrice: number;
+  status: ApplicationStatus;
+  offers: Offer[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+/* ── Submissions (delivery) ───────────────────────────────────────────────── */
+
+export const SUBMISSION_STATUSES = [
+  "DRAFT",
+  "SUBMITTED",
+  "APPROVED",
+  "REJECTED",
+  "REVISION_REQUESTED",
+] as const;
+export type SubmissionStatus = (typeof SUBMISSION_STATUSES)[number];
+
+export const PROOF_FILE_TYPES = ["SCREENSHOT", "ANALYTICS_SCREENSHOT", "DOCUMENT"] as const;
+export type ProofFileType = (typeof PROOF_FILE_TYPES)[number];
+
+export interface ProofFile {
+  type: ProofFileType;
+  url: string;
+  caption?: string;
+}
+
+export interface ProofLink {
+  url: string;
+  label?: string;
+}
+
+export interface SubmissionAnalytics {
+  impressions?: number;
+  reach?: number;
+  likes?: number;
+  comments?: number;
+  shares?: number;
+  saves?: number;
+}
+
+export interface Submission {
+  id: string;
+  contractId: string;
+  campaignId: string;
+  creatorId: string;
+  brandId: string;
+  assetType: AssetType;
+  status: SubmissionStatus;
+  files: ProofFile[];
+  links: ProofLink[];
+  note?: string;
+  analytics?: SubmissionAnalytics;
+  reviewNote?: string;
+  revision: number;
+  submittedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/* ── Notifications ────────────────────────────────────────────────────────── */
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: string;
+  title: string;
+  body: string;
+  data?: Record<string, unknown>;
+  channels: string[];
+  read: boolean;
+  createdAt: string;
+}
+
+export interface NotificationPreference {
+  inAppEnabled: boolean;
+  emailEnabled: boolean;
+  mutedInApp: string[];
+  mutedEmail: string[];
 }
