@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Inter, JetBrains_Mono, Playfair_Display } from "next/font/google";
+import { SmoothScroll } from "@/components/motion/smooth-scroll";
 import "@/styles/globals.css";
 
 /**
@@ -47,7 +48,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       lang="en"
       className={`${inter.variable} ${playfair.variable} ${jetbrains.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <SmoothScroll>{children}</SmoothScroll>
+      </body>
     </html>
   );
 }

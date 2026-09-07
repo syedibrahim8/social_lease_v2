@@ -14,6 +14,7 @@ import { BalanceCard } from "@/components/money/balance-card";
 import { EscrowTracker } from "@/components/money/escrow-tracker";
 import { LedgerTable } from "@/components/money/ledger-table";
 import type { ContractStatus, Transaction } from "@/lib/api/types";
+import { MotionDemo } from "@/app/style/motion-demo";
 
 const DEMO_LEDGER: Transaction[] = [
   {
@@ -540,7 +541,15 @@ export default function StylePage() {
         <LedgerTable transactions={DEMO_LEDGER} />
       </Section>
 
-      <Section index="17" title="Empty ledger">
+      <Section
+        index="17"
+        title="Motion"
+        note="Frequency decides whether something animates at all. Buttons press at 0.97 because the interface must acknowledge you before the network does. Reveals are marketing-only — a dashboard visited many times a day should not make you wait for it. Under reduced motion, movement stops but opacity and colour survive, because those carry comprehension."
+      >
+        <MotionDemo />
+      </Section>
+
+      <Section index="18" title="Empty ledger">
         <LedgerTable transactions={[]} />
         <p className="text-muted mt-3 text-[11px]">
           An empty ledger renders its header and nothing else. The screen that owns it pairs

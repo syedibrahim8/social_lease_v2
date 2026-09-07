@@ -20,8 +20,16 @@ import { cn } from "@/lib/utils";
 const buttonVariants = cva(
   [
     "relative inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap",
-    "rounded-lg font-semibold transition-colors",
-    "disabled:pointer-events-none disabled:opacity-50",
+    "rounded-lg font-semibold",
+    // Named properties only — `transition: all` would also animate layout
+    // properties, which cannot run on the GPU.
+    "transition-[transform,background-color,border-color,color] duration-[var(--duration-press)]",
+    "ease-[var(--ease-out-vault)]",
+    // Press feedback. The interface must visibly acknowledge the press before
+    // the network does — especially here, where the next thing that happens is
+    // money moving. Subtle: 0.97, not a bounce.
+    "active:scale-[0.97]",
+    "disabled:pointer-events-none disabled:opacity-50 disabled:active:scale-100",
     "[&_svg]:pointer-events-none [&_svg]:shrink-0",
   ].join(" "),
   {
