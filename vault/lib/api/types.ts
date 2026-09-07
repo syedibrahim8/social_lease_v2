@@ -8,6 +8,22 @@
 
 export type Role = "CREATOR" | "BRAND" | "ADMIN";
 
+/** Shared by creator and brand profiles. Only an admin can change these. */
+export const VERIFICATION_STATES = ["UNVERIFIED", "PENDING", "VERIFIED", "REJECTED"] as const;
+export type VerificationState = (typeof VERIFICATION_STATES)[number];
+
+export const NOTIFICATION_TYPES = [
+  "CAMPAIGN_CREATED",
+  "APPLICATION_RECEIVED",
+  "OFFER_RECEIVED",
+  "OFFER_ACCEPTED",
+  "PAYMENT_RECEIVED",
+  "SUBMISSION_APPROVED",
+  "VERIFICATION_APPROVED",
+  "ANNOUNCEMENT",
+] as const;
+export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
+
 /* ── Envelopes ────────────────────────────────────────────────────────────────
    Every endpoint returns exactly one of these two shapes.                     */
 
