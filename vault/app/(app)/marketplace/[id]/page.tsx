@@ -1,6 +1,6 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Check, Clock } from "lucide-react";
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Amount } from "@/components/money/amount";
+import { ApplyDialog } from "@/components/negotiation/apply-dialog";
 import { getCampaign } from "@/lib/api/endpoints/campaigns";
 import { ASSET_TYPE_LABEL, CAMPAIGN_STATUS, PLATFORM_LABEL } from "@/lib/config/labels";
 import { useAuth } from "@/lib/auth/auth-provider";
@@ -24,6 +25,7 @@ export default function CampaignDetailPage({
 }) {
   const { id } = use(params);
   const { role } = useAuth();
+  const [applyOpen, setApplyOpen] = useState(false);
 
   const query = useQuery({
     queryKey: qk.campaign(id),
@@ -58,8 +60,8 @@ export default function CampaignDetailPage({
                 title={campaign.title}
                 action={
                   role === "CREATOR" && campaign.status === "PUBLISHED" ? (
-                    <Button variant="gold" size="sm" asChild>
-                      <Link href={`/negotiations?apply=${campaign.id}`}>Apply</Link>
+                    <Button variant="gold" size="sm" onClick={() => setApplyOpen(true)}>
+                      Apply
                     </Button>
                   ) : undefined
                 }
@@ -131,6 +133,14 @@ export default function CampaignDetailPage({
                   </CardBody>
                 </Card>
               </div>
+
+              {role === "CREATOR" ? (
+                <ApplyDialog
+                  campaign={campaign}
+                  open={applyOpen}
+                  onOpenChange={setApplyOpen}
+                />
+              ) : null}
             </>
           );
         }}

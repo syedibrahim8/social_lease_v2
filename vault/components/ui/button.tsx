@@ -70,10 +70,25 @@ export function Button({
   children,
   ...props
 }: ButtonProps) {
-  const Comp = asChild ? Slot.Root : "button";
+  // `asChild` merges these props onto the caller's element (almost always a
+  // Link). Radix's Slot requires EXACTLY ONE element child, so the loading
+  // wrapper below cannot be used here — it would hand Slot a wrapper span plus
+  // a sibling and throw. Links do not have a pending state anyway, so the
+  // branch loses nothing.
+  if (asChild) {
+    return (
+      <Slot.Root
+        data-slot="button"
+        className={cn(buttonVariants({ variant, size }), className)}
+        {...props}
+      >
+        {children}
+      </Slot.Root>
+    );
+  }
 
   return (
-    <Comp
+    <button
       data-slot="button"
       className={cn(buttonVariants({ variant, size }), className)}
       disabled={disabled ?? loading}
@@ -91,7 +106,7 @@ export function Button({
           <Loader2 className="size-4 animate-spin" aria-hidden="true" />
         </span>
       ) : null}
-    </Comp>
+    </button>
   );
 }
 

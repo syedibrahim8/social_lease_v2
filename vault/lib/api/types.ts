@@ -252,10 +252,42 @@ export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
 
 export type OfferStatus = "PENDING" | "ACCEPTED" | "REJECTED" | "COUNTERED";
 
+/**
+ * Reads populate campaignId/creatorId/brandId into objects; writes and
+ * un-populated reads leave them as ids. `refId` narrows either to a string.
+ */
+export type Ref<T> = string | T;
+
+export interface UserRef {
+  id: string;
+  name: string;
+  email?: string;
+  avatar?: string;
+  role?: Role;
+}
+
+export interface CampaignRef {
+  id: string;
+  title: string;
+  assetType: AssetType;
+  platform: Platform;
+  status: CampaignStatus;
+  currency: string;
+}
+
+export function refId<T extends { id: string }>(ref: Ref<T>): string {
+  return typeof ref === "string" ? ref : ref.id;
+}
+
+export function refOrNull<T extends { id: string }>(ref: Ref<T>): T | null {
+  return typeof ref === "string" ? null : ref;
+}
+
+/** `sender`/`receiver` are NOT populated — they stay as user ids. */
 export interface Offer {
   _id?: string;
-  senderId: string;
-  receiverId: string;
+  sender: string;
+  receiver: string;
   /** Minor units. */
   amount: number;
   message?: string;
@@ -265,13 +297,18 @@ export interface Offer {
 
 export interface Application {
   id: string;
-  campaignId: string;
-  creatorId: string;
-  brandId: string;
+  campaignId: Ref<CampaignRef>;
+  creatorId: Ref<UserRef>;
+  brandId: Ref<UserRef>;
   assetType: AssetType;
+  proposal: string;
   /** Minor units. */
   proposedPrice: number;
+  estimatedReach: number;
+  currency: string;
   status: ApplicationStatus;
+  /** Set once an offer is accepted. Minor units. */
+  agreedPrice?: number;
   offers: Offer[];
   createdAt: string;
   updatedAt: string;
