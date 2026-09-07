@@ -185,6 +185,31 @@ body {
   }
 }
 
+/* Disclosure rows (the landing page's questions). CSS keyframes rather than a
+   spring: the open/close is predetermined, so it runs off the main thread, and
+   a transition cannot animate to `auto` height. Radix measures it for us. */
+@keyframes vault-accordion-down {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
+}
+
+@keyframes vault-accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
+  to {
+    height: 0;
+    opacity: 0;
+  }
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    Reduced motion — the whole system degrades to static, never to broken.
    ═══════════════════════════════════════════════════════════════════════════ */

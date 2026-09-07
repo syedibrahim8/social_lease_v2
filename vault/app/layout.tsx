@@ -27,6 +27,10 @@ const playfair = Playfair_Display({
   variable: "--font-playfair",
   display: "swap",
   weight: ["400", "500", "600"],
+  // Real italics, because the landing headline sets one phrase in italic at
+  // 72px and a synthesised slant on a display serif is visible from across the
+  // room.
+  style: ["normal", "italic"],
 });
 
 const jetbrains = JetBrains_Mono({

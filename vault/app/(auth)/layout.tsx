@@ -11,7 +11,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
     <div className="grid min-h-dvh lg:grid-cols-2">
       <div className="flex flex-col px-5 py-8 sm:px-10">
-        <Logo />
+        <Logo href="/" />
         <div className="flex flex-1 items-center justify-center py-10">
           <div className="w-full max-w-sm">{children}</div>
         </div>
