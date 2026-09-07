@@ -74,10 +74,11 @@ export default function LoginPage({
           />
         </Field>
 
-        <div className="-mt-1 flex justify-end">
+        <div className="-mt-2 flex justify-end">
           <Link
             href="/forgot-password"
-            className="text-muted hover:text-bone text-xs transition-colors"
+            // -my-2 py-2 gives a 36px tap area without adding visual space.
+            className="text-muted hover:text-bone -my-2 py-2 text-xs transition-colors"
           >
             Forgot your password?
           </Link>

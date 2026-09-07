@@ -6,7 +6,9 @@ export function Logo({ className }: { className?: string }) {
   return (
     <Link
       href="/dashboard"
-      className={cn("flex items-center gap-2.5", className)}
+      // -my-1.5 py-1.5 grows the tap area to 40px without moving the mark:
+      // at its natural height this was a 28px target.
+      className={cn("-my-1.5 inline-flex items-center gap-2.5 py-1.5", className)}
       aria-label="Vault, go to dashboard"
     >
       <span

@@ -1,9 +1,9 @@
 "use client";
 
 import { use, useState } from "react";
-import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Check, Clock } from "lucide-react";
+import { Check, Clock } from "lucide-react";
+import { BackLink } from "@/components/layout/back-link";
 import { PageHeader } from "@/components/layout/page-header";
 import { QueryBoundary } from "@/components/feedback/query-boundary";
 import { Badge } from "@/components/ui/badge";
@@ -34,13 +34,7 @@ export default function CampaignDetailPage({
 
   return (
     <>
-      <Link
-        href="/marketplace"
-        className="text-muted hover:text-bone mb-5 inline-flex items-center gap-1.5 text-xs transition-colors"
-      >
-        <ArrowLeft className="size-3.5" aria-hidden="true" />
-        All campaigns
-      </Link>
+      <BackLink href="/marketplace">All campaigns</BackLink>
 
       <QueryBoundary
         query={query}

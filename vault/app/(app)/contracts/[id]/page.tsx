@@ -1,10 +1,10 @@
 "use client";
 
 import { use } from "react";
-import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
+import { BackLink } from "@/components/layout/back-link";
 import { PageHeader } from "@/components/layout/page-header";
 import { QueryBoundary } from "@/components/feedback/query-boundary";
 import { DeliverablesList } from "@/components/contract/deliverables-list";
@@ -57,13 +57,7 @@ export default function ContractDetailPage({
 
   return (
     <>
-      <Link
-        href="/contracts"
-        className="text-muted hover:text-bone mb-5 inline-flex items-center gap-1.5 text-xs transition-colors"
-      >
-        <ArrowLeft className="size-3.5" aria-hidden="true" />
-        All contracts
-      </Link>
+      <BackLink href="/contracts">All contracts</BackLink>
 
       <QueryBoundary
         query={query}

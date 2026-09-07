@@ -3,7 +3,8 @@
 import { use } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
+import { BackLink } from "@/components/layout/back-link";
 import { PageHeader } from "@/components/layout/page-header";
 import { QueryBoundary } from "@/components/feedback/query-boundary";
 import { OfferThread } from "@/components/negotiation/offer-thread";
@@ -35,13 +36,7 @@ export default function NegotiationDetailPage({
 
   return (
     <>
-      <Link
-        href="/negotiations"
-        className="text-muted hover:text-bone mb-5 inline-flex items-center gap-1.5 text-xs transition-colors"
-      >
-        <ArrowLeft className="size-3.5" aria-hidden="true" />
-        All negotiations
-      </Link>
+      <BackLink href="/negotiations">All negotiations</BackLink>
 
       <QueryBoundary
         query={query}
