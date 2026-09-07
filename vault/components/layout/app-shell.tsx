@@ -9,6 +9,18 @@ import { AccountMenu } from "@/components/layout/account-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/lib/auth/auth-provider";
 import { useNotificationStream } from "@/lib/notifications/use-notification-stream";
+import { cn } from "@/lib/utils";
+
+/**
+ * The one content container, shared by the header and the page.
+ *
+ * 1400px rather than max-w-6xl (1152px): this is a dashboard with a fixed
+ * sidebar and dense tables, not an article. At 1152 a 1920px monitor left ~270px
+ * of dead space on each side and a 2560px one left nearly 600px, with the
+ * header stretching past it all. Wide enough to use a large screen, capped so
+ * text lines never become unreadably long on an ultrawide.
+ */
+const CONTAINER = "mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-8";
 
 /**
  * The authenticated frame: fixed sidebar on desktop, drawer below `lg`.
@@ -35,35 +47,46 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="lg:pl-56">
-        {/* Top bar. Capped at 60px: a bar that eats the viewport is a bar you
-            resent on every screen. */}
-        <header className="border-line-2 bg-ink/85 sticky top-0 z-30 flex h-15 items-center gap-2 border-b px-4 backdrop-blur-md sm:px-6">
-          <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
-            <SheetTrigger
-              aria-label="Open navigation"
-              className="text-muted hover:text-bone hover:bg-bone/5 grid size-9 place-items-center rounded-lg transition-colors lg:hidden"
-            >
-              <Menu className="size-4" aria-hidden="true" />
-            </SheetTrigger>
-            <SheetContent title="Navigation">
-              <div className="border-line-2 mb-4 border-b px-2 pb-4">
-                <Logo />
-              </div>
-              <SidebarNav role={role} onNavigate={() => setDrawerOpen(false)} />
-            </SheetContent>
-          </Sheet>
+        {/*
+          The header BAR spans the full width so its border and backdrop reach
+          the window edge, but its CONTENTS sit in the same centred container as
+          the page below. Previously the bar stretched edge to edge while the
+          content was capped and centred, so on a wide monitor the account menu
+          floated far to the right of everything it belonged to — which reads as
+          a broken layout rather than a deliberate one.
 
-          <div className="lg:hidden">
-            <Logo />
-          </div>
+          Capped at 60px tall: a bar that eats the viewport is one you resent on
+          every screen.
+        */}
+        <header className="border-line-2 bg-ink/85 sticky top-0 z-30 h-15 border-b backdrop-blur-md">
+          <div className={cn(CONTAINER, "flex h-full items-center gap-2")}>
+            <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
+              <SheetTrigger
+                aria-label="Open navigation"
+                className="text-muted hover:text-bone hover:bg-bone/5 grid size-9 place-items-center rounded-lg transition-colors lg:hidden"
+              >
+                <Menu className="size-4" aria-hidden="true" />
+              </SheetTrigger>
+              <SheetContent title="Navigation">
+                <div className="border-line-2 mb-4 border-b px-2 pb-4">
+                  <Logo />
+                </div>
+                <SidebarNav role={role} onNavigate={() => setDrawerOpen(false)} />
+              </SheetContent>
+            </Sheet>
 
-          <div className="ml-auto flex items-center gap-1">
-            <NotificationBell />
-            <AccountMenu />
+            <div className="lg:hidden">
+              <Logo />
+            </div>
+
+            <div className="ml-auto flex items-center gap-1">
+              <NotificationBell />
+              <AccountMenu />
+            </div>
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+        <main className={cn(CONTAINER, "py-6 sm:py-8")}>{children}</main>
       </div>
     </div>
   );
