@@ -52,6 +52,18 @@ export function setRefreshHandler(handler: (() => Promise<string | null>) | null
   refreshSession = handler;
 }
 
+/**
+ * The current access token, rotating it first if there isn't one.
+ *
+ * For the SSE stream, which authenticates once at handshake rather than
+ * per-request and so cannot lean on the 401-retry path below.
+ */
+export async function getTokenForStream(): Promise<string | null> {
+  const existing = getAccessToken();
+  if (existing) return existing;
+  return refreshSession ? refreshOnce() : null;
+}
+
 export interface ApiResult<T> {
   data: T;
   meta?: ApiMeta;
