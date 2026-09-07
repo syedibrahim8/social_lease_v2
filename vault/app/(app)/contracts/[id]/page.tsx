@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FundEscrowDialog } from "@/components/contract/fund-escrow-dialog";
+import { DeliveryPanel } from "@/components/contract/delivery-panel";
 import { ApiError } from "@/lib/api/client";
 import { cancelContract, getContract } from "@/lib/api/endpoints/contracts";
 import { getPaymentForContract } from "@/lib/api/endpoints/payments";
@@ -153,7 +154,9 @@ export default function ContractDetailPage({
                     </Card>
                   ) : null}
 
-                  {/* Delivery and payout actions mount here in the next tasks. */}
+                  <DeliveryPanel contract={contract} isCreator={isCreator} />
+
+                  {/* Payout release / refund mount here in the next task. */}
                 </div>
 
                 <div className="space-y-4">
