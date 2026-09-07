@@ -16,6 +16,7 @@ import { Card, CardBody } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FundEscrowDialog } from "@/components/contract/fund-escrow-dialog";
 import { DeliveryPanel } from "@/components/contract/delivery-panel";
+import { MoneyActions } from "@/components/contract/money-actions";
 import { ApiError } from "@/lib/api/client";
 import { cancelContract, getContract } from "@/lib/api/endpoints/contracts";
 import { getPaymentForContract } from "@/lib/api/endpoints/payments";
@@ -156,7 +157,11 @@ export default function ContractDetailPage({
 
                   <DeliveryPanel contract={contract} isCreator={isCreator} />
 
-                  {/* Payout release / refund mount here in the next task. */}
+                  <MoneyActions
+                    contract={contract}
+                    payment={payment.data}
+                    isCreator={isCreator}
+                  />
                 </div>
 
                 <div className="space-y-4">
