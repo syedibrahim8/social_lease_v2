@@ -203,9 +203,10 @@ export interface Deliverable {
 export interface Contract {
   id: string;
   applicationId: string;
-  campaignId: string;
-  brandId: string;
-  creatorId: string;
+  /** Populated on read, an id on write. */
+  campaignId: Ref<CampaignRef>;
+  brandId: Ref<UserRef>;
+  creatorId: Ref<UserRef>;
   assetType: AssetType;
   platform: Platform;
   /** Minor units. The agreed price from the accepted offer. */
