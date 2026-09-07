@@ -106,7 +106,7 @@ export default function CampaignDetailPage({
                       </p>
                       <p className="mt-2 text-[15px]">
                         <Amount minor={campaign.budgetMin} currency={campaign.currency} />
-                        <span className="text-faint mx-1.5">to</span>
+                        <span className="text-muted mx-1.5">to</span>
                         <Amount minor={campaign.budgetMax} currency={campaign.currency} />
                       </p>
                       <p className="text-muted mt-2 text-[11px] leading-relaxed">

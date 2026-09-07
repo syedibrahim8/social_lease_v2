@@ -60,7 +60,7 @@ export function OfferThread({
               )}
             >
               <div className="mb-1.5 flex items-center gap-2">
-                <span className="text-faint text-[10px] font-semibold tracking-[0.14em] uppercase">
+                <span className="text-muted text-[10px] font-semibold tracking-[0.14em] uppercase">
                   {mine ? "You offered" : "They offered"}
                 </span>
                 <Badge tone={OFFER_TONE[offer.status]}>{OFFER_LABEL[offer.status]}</Badge>
@@ -74,7 +74,7 @@ export function OfferThread({
                 </p>
               ) : null}
 
-              <p className="tnum text-faint mt-2 text-[10px]">
+              <p className="tnum text-muted mt-2 text-[10px]">
                 {format(new Date(offer.createdAt), "MMM d, HH:mm")}
               </p>
             </div>

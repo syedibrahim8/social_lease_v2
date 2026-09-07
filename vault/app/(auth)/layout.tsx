@@ -44,13 +44,13 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           </p>
           <dl className="border-line mt-9 grid grid-cols-3 gap-6 border-t pt-6">
             <div>
-              <dt className="text-faint text-[10px] font-semibold tracking-[0.16em] uppercase">
+              <dt className="text-muted text-[10px] font-semibold tracking-[0.16em] uppercase">
                 Held first
               </dt>
               <dd className="tnum text-bone mt-2 text-lg">Escrow</dd>
             </div>
             <div>
-              <dt className="text-faint text-[10px] font-semibold tracking-[0.16em] uppercase">
+              <dt className="text-muted text-[10px] font-semibold tracking-[0.16em] uppercase">
                 Platform fee
               </dt>
               <dd className="tnum text-bone mt-2 text-lg">
@@ -58,7 +58,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
               </dd>
             </div>
             <div>
-              <dt className="text-faint text-[10px] font-semibold tracking-[0.16em] uppercase">
+              <dt className="text-muted text-[10px] font-semibold tracking-[0.16em] uppercase">
                 Payouts via
               </dt>
               <dd className="tnum text-bone mt-2 text-lg">Stripe</dd>

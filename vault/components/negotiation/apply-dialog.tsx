@@ -124,7 +124,7 @@ export function ApplyDialog({
                 </p>
                 <p className="mt-1 text-[13px]">
                   <Amount minor={campaign.budgetMin} currency={campaign.currency} />
-                  <span className="text-faint mx-1">to</span>
+                  <span className="text-muted mx-1">to</span>
                   <Amount minor={campaign.budgetMax} currency={campaign.currency} />
                 </p>
               </div>

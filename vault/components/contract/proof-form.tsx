@@ -98,7 +98,7 @@ export function ProofForm({
                 <span className="min-w-0 flex-1">
                   <span className="text-bone-2 block truncate text-xs">{l.label ?? l.url}</span>
                   {l.label ? (
-                    <span className="text-faint block truncate text-[11px]">{l.url}</span>
+                    <span className="text-muted block truncate text-[11px]">{l.url}</span>
                   ) : null}
                 </span>
                 <button
@@ -166,7 +166,7 @@ export function ProofForm({
                     {f.caption ?? f.url}
                   </span>
                   {f.caption ? (
-                    <span className="text-faint block truncate text-[11px]">{f.url}</span>
+                    <span className="text-muted block truncate text-[11px]">{f.url}</span>
                   ) : null}
                 </span>
                 <button

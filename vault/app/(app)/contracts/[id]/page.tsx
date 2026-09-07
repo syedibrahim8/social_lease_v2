@@ -169,7 +169,7 @@ export default function ContractDetailPage({
 
                   <Card>
                     <CardBody>
-                      <p className="text-faint text-[10px] tracking-[0.14em] uppercase">
+                      <p className="text-muted text-[10px] tracking-[0.14em] uppercase">
                         Timeline
                       </p>
                       <p className="tnum text-bone mt-2 flex items-center gap-1.5 text-[13px]">

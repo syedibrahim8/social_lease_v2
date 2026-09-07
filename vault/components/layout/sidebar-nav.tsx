@@ -28,7 +28,7 @@ export function SidebarNav({
     <nav aria-label="Primary" className="flex flex-col gap-5">
       {navFor(role).map((section) => (
         <div key={section.label}>
-          <p className="text-faint px-2.5 pb-2 text-[10px] font-semibold tracking-[0.16em] uppercase">
+          <p className="text-muted px-2.5 pb-2 text-[10px] font-semibold tracking-[0.16em] uppercase">
             {section.label}
           </p>
           <ul className="flex flex-col gap-0.5">

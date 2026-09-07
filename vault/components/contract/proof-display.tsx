@@ -28,7 +28,7 @@ export function ProofDisplay({ submission }: { submission: Submission }) {
     <div className="space-y-5">
       {submission.links.length > 0 ? (
         <div>
-          <p className="text-faint mb-2 text-[10px] tracking-[0.14em] uppercase">Live links</p>
+          <p className="text-muted mb-2 text-[10px] tracking-[0.14em] uppercase">Live links</p>
           <ul className="space-y-1.5">
             {submission.links.map((l, i) => (
               <li key={`${l.url}-${i}`}>
@@ -49,7 +49,7 @@ export function ProofDisplay({ submission }: { submission: Submission }) {
 
       {submission.files.length > 0 ? (
         <div>
-          <p className="text-faint mb-2 text-[10px] tracking-[0.14em] uppercase">Files</p>
+          <p className="text-muted mb-2 text-[10px] tracking-[0.14em] uppercase">Files</p>
           <ul className="space-y-1.5">
             {submission.files.map((f, i) => {
               const Icon = FILE_ICON[f.type];
@@ -73,7 +73,7 @@ export function ProofDisplay({ submission }: { submission: Submission }) {
 
       {analytics.length > 0 ? (
         <div>
-          <p className="text-faint mb-2 text-[10px] tracking-[0.14em] uppercase">
+          <p className="text-muted mb-2 text-[10px] tracking-[0.14em] uppercase">
             Reported performance
           </p>
           <dl className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -91,7 +91,7 @@ export function ProofDisplay({ submission }: { submission: Submission }) {
 
       {submission.note ? (
         <div>
-          <p className="text-faint mb-2 text-[10px] tracking-[0.14em] uppercase">
+          <p className="text-muted mb-2 text-[10px] tracking-[0.14em] uppercase">
             Note from the creator
           </p>
           <p className="text-bone-2 text-[13px] leading-relaxed whitespace-pre-wrap">
@@ -103,7 +103,7 @@ export function ProofDisplay({ submission }: { submission: Submission }) {
       {submission.reviewNote ? (
         <div className="border-line-2 bg-bone/[0.03] rounded-lg border px-3.5 py-3">
           <div className="mb-1.5 flex items-center gap-2">
-            <p className="text-faint text-[10px] tracking-[0.14em] uppercase">
+            <p className="text-muted text-[10px] tracking-[0.14em] uppercase">
               Feedback from the brand
             </p>
             <Badge tone={submission.status === "REJECTED" ? "negative" : "info"}>

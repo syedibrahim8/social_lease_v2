@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Dialog as SheetPrimitive } from "radix-ui";
 import { X } from "lucide-react";
+import { useReturnFocus } from "@/lib/use-return-focus";
 import { cn } from "@/lib/utils";
 
 export const Sheet = SheetPrimitive.Root;
@@ -14,8 +15,14 @@ export function SheetContent({
   className,
   children,
   title,
+  onOpenAutoFocus,
+  onCloseAutoFocus,
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Content> & { title: string }) {
+  // Same reason as the dialog: the drawer is controlled, so Radix has no
+  // trigger ref to hand focus back to. See lib/use-return-focus.ts.
+  const focusHandlers = useReturnFocus({ onOpenAutoFocus, onCloseAutoFocus });
+
   return (
     <SheetPrimitive.Portal>
       <SheetPrimitive.Overlay className="fixed inset-0 z-50 bg-black/70 backdrop-blur-[2px]" />
@@ -26,6 +33,7 @@ export function SheetContent({
           "data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left",
           className,
         )}
+        {...focusHandlers}
         {...props}
       >
         {/* Radix requires an accessible title; ours is visually carried by the

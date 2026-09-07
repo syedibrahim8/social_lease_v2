@@ -38,6 +38,18 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-dvh">
+      {/*
+        First in the DOM, invisible until focused. Without it a keyboard user
+        tabs through the eight sidebar links and both header controls before
+        reaching the page, on every single navigation.
+      */}
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:bg-surface focus:border-line focus:text-bone focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-lg focus:border focus:px-4 focus:py-2 focus:text-[13px] focus:font-medium"
+      >
+        Skip to content
+      </a>
+
       {/* Desktop sidebar */}
       <aside className="border-line-2 bg-ink-2 fixed inset-y-0 left-0 hidden w-56 flex-col border-r px-3 py-4 lg:flex">
         <div className="border-line-2 mb-4 border-b px-2 pb-4">
@@ -86,7 +98,11 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main className={cn(CONTAINER, "py-6 sm:py-8")}>{children}</main>
+        {/* tabIndex -1 so the skip link can actually move focus here, not just
+            scroll the viewport. */}
+        <main id="main" tabIndex={-1} className={cn(CONTAINER, "py-6 outline-none sm:py-8")}>
+          {children}
+        </main>
       </div>
     </div>
   );

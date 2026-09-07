@@ -103,13 +103,13 @@ export function NotificationSettings() {
                   <table className="w-full">
                     <thead>
                       <tr>
-                        <th className="text-faint pb-2 text-left text-[10px] tracking-[0.14em] uppercase">
+                        <th className="text-muted pb-2 text-left text-[10px] tracking-[0.14em] uppercase">
                           Event
                         </th>
-                        <th className="text-faint w-20 pb-2 text-[10px] tracking-[0.14em] uppercase">
+                        <th className="text-muted w-20 pb-2 text-[10px] tracking-[0.14em] uppercase">
                           In-app
                         </th>
-                        <th className="text-faint w-20 pb-2 text-[10px] tracking-[0.14em] uppercase">
+                        <th className="text-muted w-20 pb-2 text-[10px] tracking-[0.14em] uppercase">
                           Email
                         </th>
                       </tr>

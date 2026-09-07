@@ -20,6 +20,13 @@
    colour: hairlines, inactive tracker dots, disabled glyph fills. If you are
    about to set `color: var(--color-faint)` on something a person reads, use
    `muted` instead.
+
+   This is enforced, not aspirational. `text-faint` survives in exactly two
+   places in the app, both non-text graphics where the 3:1 threshold applies:
+   the incomplete-deliverable bullet and the search glyph in the filter rail.
+   `grep -rn text-faint --include=*.tsx` should return those two lines and
+   nothing else. An earlier pass had it on forty labels, table headers,
+   timestamps and placeholders, all of them read at 3.3:1.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @theme {

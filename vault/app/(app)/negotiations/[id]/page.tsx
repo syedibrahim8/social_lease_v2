@@ -122,7 +122,7 @@ export default function NegotiationDetailPage({
                   <Card>
                     <CardBody className="space-y-3">
                       <div>
-                        <p className="text-faint text-[10px] tracking-[0.14em] uppercase">
+                        <p className="text-muted text-[10px] tracking-[0.14em] uppercase">
                           Opening proposal
                         </p>
                         <Amount
@@ -132,7 +132,7 @@ export default function NegotiationDetailPage({
                         />
                       </div>
                       <div>
-                        <p className="text-faint text-[10px] tracking-[0.14em] uppercase">
+                        <p className="text-muted text-[10px] tracking-[0.14em] uppercase">
                           Estimated reach
                         </p>
                         <p className="tnum text-bone-2 mt-1 text-[13px]">
@@ -144,7 +144,7 @@ export default function NegotiationDetailPage({
 
                   <Card>
                     <CardBody>
-                      <p className="text-faint mb-2 text-[10px] tracking-[0.14em] uppercase">
+                      <p className="text-muted mb-2 text-[10px] tracking-[0.14em] uppercase">
                         The pitch
                       </p>
                       <p className="text-bone-2 text-[13px] leading-relaxed whitespace-pre-wrap">

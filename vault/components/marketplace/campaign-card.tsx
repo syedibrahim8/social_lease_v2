@@ -39,10 +39,10 @@ export function CampaignCard({
 
           <div className="border-line-2 flex items-end justify-between border-t pt-3">
             <div>
-              <p className="text-faint text-[10px] tracking-[0.14em] uppercase">Budget</p>
+              <p className="text-muted text-[10px] tracking-[0.14em] uppercase">Budget</p>
               <p className="mt-1 text-[13px]">
                 <Amount minor={campaign.budgetMin} currency={campaign.currency} />
-                <span className="text-faint mx-1">to</span>
+                <span className="text-muted mx-1">to</span>
                 <Amount minor={campaign.budgetMax} currency={campaign.currency} />
               </p>
             </div>

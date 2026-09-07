@@ -34,7 +34,7 @@ export function TH({ className, ...props }: React.ComponentProps<"th">) {
   return (
     <th
       className={cn(
-        "text-faint px-4 py-2.5 text-left text-[10px] font-semibold tracking-[0.15em] uppercase",
+        "text-muted px-4 py-2.5 text-left text-[10px] font-semibold tracking-[0.15em] uppercase",
         className,
       )}
       {...props}

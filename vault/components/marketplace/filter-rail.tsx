@@ -105,7 +105,7 @@ export function FilterRail({
           const current = params.get(group.key);
           return (
             <div key={group.key}>
-              <p className="text-faint mb-2 text-[10px] font-semibold tracking-[0.14em] uppercase">
+              <p className="text-muted mb-2 text-[10px] font-semibold tracking-[0.14em] uppercase">
                 {group.label}
               </p>
               <div className="flex flex-wrap gap-1.5">

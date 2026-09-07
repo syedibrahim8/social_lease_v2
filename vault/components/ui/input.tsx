@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 const fieldBase = [
   "w-full rounded-lg border border-line-2 bg-surface px-3 text-[13px] text-bone",
-  "placeholder:text-faint transition-colors",
+  "placeholder:text-muted transition-colors",
   "hover:border-bone/18",
   "focus:border-gold/45",
   "disabled:cursor-not-allowed disabled:opacity-50",

@@ -107,7 +107,7 @@ export default function NegotiationsPage() {
                         </div>
 
                         <div className="text-right">
-                          <p className="text-faint text-[10px] tracking-[0.14em] uppercase">
+                          <p className="text-muted text-[10px] tracking-[0.14em] uppercase">
                             {offer ? "On the table" : app.agreedPrice ? "Agreed" : "Proposed"}
                           </p>
                           <Amount

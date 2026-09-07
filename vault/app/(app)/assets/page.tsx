@@ -129,7 +129,7 @@ function AssetsBody() {
                       <div className="border-line-2 flex items-end justify-between border-t pt-3">
                         {a.price !== undefined ? (
                           <div>
-                            <p className="text-faint text-[10px] tracking-[0.14em] uppercase">
+                            <p className="text-muted text-[10px] tracking-[0.14em] uppercase">
                               From
                             </p>
                             <Amount

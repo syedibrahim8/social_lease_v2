@@ -5,3 +5,6 @@ web/
 vault/
 pnpm-lock.yaml
 *.log
+
+# Editor and agent state, not project source. Git ignores it too.
+.claude/

@@ -146,7 +146,7 @@ export default function StylePage() {
               <div className="h-16" style={{ background: s.value }} />
               <div className="bg-surface px-3 py-2">
                 <p className="tnum text-bone text-[11px]">{s.name}</p>
-                <p className="text-faint mt-0.5 text-[10px]">{s.value}</p>
+                <p className="text-muted mt-0.5 text-[10px]">{s.value}</p>
                 <p className="text-muted mt-1 text-[10px]">{s.note}</p>
               </div>
             </div>
@@ -198,7 +198,7 @@ export default function StylePage() {
               <p className="tnum text-[11px]" style={{ color: c.value }}>
                 {c.name}
               </p>
-              <p className="text-faint mt-0.5 text-[10px]">{c.value}</p>
+              <p className="text-muted mt-0.5 text-[10px]">{c.value}</p>
               <p className="text-muted mt-1 text-[10px] leading-snug">{c.note}</p>
               <p className="tnum text-muted mt-1 text-[10px]">{c.ratio}:1</p>
             </div>
@@ -213,13 +213,13 @@ export default function StylePage() {
       >
         <div className="space-y-5">
           <div className="border-line-2 flex items-baseline gap-6 border-b pb-4">
-            <span className="tnum text-faint w-40 shrink-0 text-[10px] tracking-wider">
+            <span className="tnum text-muted w-40 shrink-0 text-[10px] tracking-wider">
               Playfair · display
             </span>
             <span className="font-display text-3xl">Escrow released</span>
           </div>
           <div className="border-line-2 flex items-baseline gap-6 border-b pb-4">
-            <span className="tnum text-faint w-40 shrink-0 text-[10px] tracking-wider">
+            <span className="tnum text-muted w-40 shrink-0 text-[10px] tracking-wider">
               Playfair · money
             </span>
             <span className="font-display text-3xl">
@@ -227,7 +227,7 @@ export default function StylePage() {
             </span>
           </div>
           <div className="border-line-2 flex items-baseline gap-6 border-b pb-4">
-            <span className="tnum text-faint w-40 shrink-0 text-[10px] tracking-wider">
+            <span className="tnum text-muted w-40 shrink-0 text-[10px] tracking-wider">
               JetBrains · figures
             </span>
             <span className="tnum text-bone text-base">
@@ -235,7 +235,7 @@ export default function StylePage() {
             </span>
           </div>
           <div className="flex items-baseline gap-6">
-            <span className="tnum text-faint w-40 shrink-0 text-[10px] tracking-wider">
+            <span className="tnum text-muted w-40 shrink-0 text-[10px] tracking-wider">
               Inter · interface
             </span>
             <span className="text-bone-2 text-sm">
@@ -254,7 +254,7 @@ export default function StylePage() {
           <p className="tnum text-positive text-sm">+9,000.00</p>
           <p className="tnum text-negative text-sm">−2,711.11</p>
           <p className="tnum text-bone text-sm">+5,400.00</p>
-          <p className="text-faint mt-3 mb-1 text-[10px] tracking-wider uppercase">
+          <p className="text-muted mt-3 mb-1 text-[10px] tracking-wider uppercase">
             without .tnum — note the drift
           </p>
           <p className="text-positive text-sm">+9,000.00</p>
@@ -449,7 +449,7 @@ export default function StylePage() {
           />
         </div>
         <div className="mt-4">
-          <p className="text-faint mb-2 text-[10px] tracking-wider uppercase">
+          <p className="text-muted mb-2 text-[10px] tracking-wider uppercase">
             Skeletons mirror the shape they replace
           </p>
           <Card>
@@ -469,7 +469,7 @@ export default function StylePage() {
       >
         <div className="grid gap-6 sm:grid-cols-2">
           <div className="space-y-3">
-            <p className="text-faint text-[10px] tracking-wider uppercase">display</p>
+            <p className="text-muted text-[10px] tracking-wider uppercase">display</p>
             <Amount minor={4825000} variant="display" className="block text-4xl" />
             <Amount minor={0} variant="display" className="block text-2xl" />
             <Amount minor={-270000} variant="display" className="block text-2xl" />
@@ -479,7 +479,7 @@ export default function StylePage() {
             </p>
           </div>
           <div className="space-y-2">
-            <p className="text-faint text-[10px] tracking-wider uppercase">figure</p>
+            <p className="text-muted text-[10px] tracking-wider uppercase">figure</p>
             <Amount minor={4825000} className="block" />
             <Amount minor={900000} signed className="block" />
             <Amount minor={-270000} signed className="block" />
@@ -525,7 +525,7 @@ export default function StylePage() {
           {TRACKER_STATES.map((s) => (
             <Card key={s}>
               <CardBody className="space-y-3">
-                <p className="tnum text-faint text-[10px]">{s}</p>
+                <p className="tnum text-muted text-[10px]">{s}</p>
                 <EscrowTracker status={s} />
               </CardBody>
             </Card>

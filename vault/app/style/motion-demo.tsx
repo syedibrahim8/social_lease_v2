@@ -27,7 +27,7 @@ export function MotionDemo() {
     <div className="space-y-8">
       <div>
         <div className="mb-3 flex items-center gap-3">
-          <p className="text-faint text-[10px] tracking-wider uppercase">
+          <p className="text-muted text-[10px] tracking-wider uppercase">
             Count-up · first mount only
           </p>
           <Badge tone={mounted && reduced ? "warning" : "muted"}>{reducedLabel}</Badge>
@@ -52,7 +52,7 @@ export function MotionDemo() {
       </div>
 
       <div>
-        <p className="text-faint mb-3 text-[10px] tracking-wider uppercase">
+        <p className="text-muted mb-3 text-[10px] tracking-wider uppercase">
           Payout release · the set-piece
         </p>
         {released ? (

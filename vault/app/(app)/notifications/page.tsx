@@ -210,7 +210,7 @@ function Row({
           <div className="mb-1 flex flex-wrap items-center gap-1.5">
             <Badge tone={MONEY_TYPES.has(n.type) ? "gold" : "muted"}>{label}</Badge>
             {!n.read ? <Badge tone="info">New</Badge> : null}
-            <span className="tnum text-faint text-[10px]">
+            <span className="tnum text-muted text-[10px]">
               {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}
             </span>
           </div>

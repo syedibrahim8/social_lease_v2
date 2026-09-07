@@ -1,5 +1,4 @@
 import {
-  BadgeCheck,
   Bell,
   Compass,
   FileText,
@@ -71,15 +70,10 @@ export const NAV_BY_ROLE: Record<Role, NavSection[]> = {
     },
     account,
   ],
-  ADMIN: [
-    {
-      label: "Account",
-      items: [
-        { label: "Verification", href: "/verifications", icon: BadgeCheck },
-        { label: "Settings", href: "/settings", icon: Settings },
-      ],
-    },
-  ],
+  // An admin gets only what this slice actually built. The verification queue
+  // belongs to the admin slice and has no route here yet, and a nav item
+  // pointing at a 404 is worse than no nav item.
+  ADMIN: [account],
 };
 
 export function navFor(role: Role): NavSection[] {

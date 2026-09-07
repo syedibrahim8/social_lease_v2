@@ -107,7 +107,7 @@ export default function ContractsPage() {
                           </div>
 
                           <div className="text-right">
-                            <p className="text-faint text-[10px] tracking-[0.14em] uppercase">
+                            <p className="text-muted text-[10px] tracking-[0.14em] uppercase">
                               Agreed
                             </p>
                             <Amount
