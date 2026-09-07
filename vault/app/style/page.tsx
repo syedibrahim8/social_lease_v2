@@ -1,4 +1,14 @@
 import type { Metadata } from "next";
+import { Inbox } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardBody, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Input, Textarea } from "@/components/ui/input";
+import { Field } from "@/components/ui/field";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
+import { EmptyState } from "@/components/feedback/empty-state";
+import { ErrorState } from "@/components/feedback/error-state";
 
 export const metadata: Metadata = { title: "Design system" };
 
@@ -232,6 +242,170 @@ export default function StylePage() {
         >
           Release payout
         </button>
+      </Section>
+
+      <Section
+        index="08"
+        title="Buttons"
+        note="Variants map to intent, not colour. Gold is the money action and there is at most one per screen — if two things look primary, neither is. Loading keeps the label's box and only hides it, so a button never changes width mid-action."
+      >
+        <div className="flex flex-wrap items-center gap-3">
+          <Button variant="gold">Release payout</Button>
+          <Button variant="ghost">Request revision</Button>
+          <Button variant="quiet">Cancel</Button>
+          <Button variant="danger">Refund $5,000.00</Button>
+          <Button variant="gold" loading>
+            Release payout
+          </Button>
+          <Button variant="ghost" disabled>
+            Not your turn
+          </Button>
+          <Button variant="quiet" size="sm">
+            Small
+          </Button>
+        </div>
+      </Section>
+
+      <Section index="09" title="Badges">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge tone="gold">◆ In escrow</Badge>
+          <Badge tone="positive">Payouts enabled</Badge>
+          <Badge tone="warning">Awaiting approval</Badge>
+          <Badge tone="negative">Refunded</Badge>
+          <Badge tone="info">Revision requested</Badge>
+          <Badge tone="muted">Draft</Badge>
+        </div>
+      </Section>
+
+      <Section
+        index="10"
+        title="Cards"
+        note="tone=&quot;money&quot; puts a card on the emerald surface with a gold hairline. Reserved for balances, escrow and contract value, so the surface itself says what kind of information this is."
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Default surface</CardTitle>
+              <CardDescription>Lists, forms, settings — everything that isn&apos;t money.</CardDescription>
+            </CardHeader>
+            <CardBody className="pt-2">
+              <p className="text-bone-2 text-sm">Neutral panel on the standard surface.</p>
+            </CardBody>
+          </Card>
+          <Card tone="money">
+            <CardHeader>
+              <CardTitle>Money surface</CardTitle>
+              <CardDescription>Balances, escrow, contract value.</CardDescription>
+            </CardHeader>
+            <CardBody className="pt-2">
+              <p className="font-display text-3xl">
+                $48,250<span className="text-gold">.00</span>
+              </p>
+            </CardBody>
+          </Card>
+        </div>
+      </Section>
+
+      <Section
+        index="11"
+        title="Fields"
+        note="Labels are always visible. Placeholder-as-label loses the question the moment someone types, which is worst exactly where it matters most. Errors sit under their own field, wired with aria-describedby and role=alert."
+      >
+        <div className="grid max-w-xl gap-4">
+          <Field label="Campaign title" htmlFor="demo-title" required>
+            <Input id="demo-title" placeholder="Spring reel campaign" />
+          </Field>
+          <Field
+            label="Proof link"
+            htmlFor="demo-link"
+            hint="A public URL to the published asset."
+          >
+            <Input id="demo-link" placeholder="https://" />
+          </Field>
+          <Field
+            label="Amount"
+            htmlFor="demo-amount"
+            error="Amount must be at least $1.00."
+          >
+            <Input id="demo-amount" aria-invalid defaultValue="0" className="tnum" />
+          </Field>
+          <Field label="Note to the brand" htmlFor="demo-note">
+            <Textarea id="demo-note" placeholder="Anything they should know…" />
+          </Field>
+        </div>
+      </Section>
+
+      <Section
+        index="12"
+        title="Ledger table"
+        note="The table wraps itself in its own scroll container, so a wide ledger scrolls inside its card and the page body never scrolls sideways."
+      >
+        <Table>
+          <THead>
+            <TR className="border-t-0">
+              <TH>Description</TH>
+              <TH>Type</TH>
+              <TH className="text-right">Amount</TH>
+              <TH className="text-right">Date</TH>
+            </TR>
+          </THead>
+          <TBody>
+            <TR>
+              <TD>Payout · Nord Coffee spring reel</TD>
+              <TD>
+                <Badge tone="positive">PAYOUT</Badge>
+              </TD>
+              <TD className="tnum text-positive text-right">+9,000.00</TD>
+              <TD className="tnum text-muted text-right">Sep 04</TD>
+            </TR>
+            <TR>
+              <TD>Escrow funded · Atlas Running UGC</TD>
+              <TD>
+                <Badge tone="gold">EARNING</Badge>
+              </TD>
+              <TD className="tnum text-right">+5,400.00</TD>
+              <TD className="tnum text-muted text-right">Sep 02</TD>
+            </TR>
+            <TR>
+              <TD>Escrow reversed · Lumen skincare</TD>
+              <TD>
+                <Badge tone="muted">REFUND</Badge>
+              </TD>
+              <TD className="tnum text-negative text-right">−2,700.00</TD>
+              <TD className="tnum text-muted text-right">Aug 28</TD>
+            </TR>
+          </TBody>
+        </Table>
+      </Section>
+
+      <Section
+        index="13"
+        title="States"
+        note="This app has no fixtures. When a collection is empty the person genuinely has nothing there, so the screen owes them an explanation and a next step. Errors show the server's own message — it is almost always more useful than anything invented here."
+      >
+        <div className="grid gap-4 lg:grid-cols-2">
+          <EmptyState
+            icon={Inbox}
+            title="No contracts yet"
+            description="Contracts appear here once you accept an offer. Start from a negotiation."
+            action={<Button variant="ghost" size="sm">Go to negotiations</Button>}
+          />
+          <ErrorState
+            error={new Error("Contract is APPROVED and cannot be refunded")}
+          />
+        </div>
+        <div className="mt-4">
+          <p className="text-faint mb-2 text-[10px] tracking-wider uppercase">
+            Skeletons mirror the shape they replace
+          </p>
+          <Card>
+            <CardBody className="space-y-3">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-9 w-48" />
+              <Skeleton className="h-3 w-36" />
+            </CardBody>
+          </Card>
+        </div>
       </Section>
     </main>
   );
