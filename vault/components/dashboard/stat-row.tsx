@@ -28,7 +28,7 @@ export interface Stat {
 export function StatRow({ stats, loading }: { stats: Stat[]; loading?: boolean }) {
   if (loading) {
     return (
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }, (_, i) => (
           <Card key={i}>
             <CardBody className="space-y-2.5">
@@ -42,7 +42,7 @@ export function StatRow({ stats, loading }: { stats: Stat[]; loading?: boolean }
   }
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       {stats.map((s) => {
         const Icon = s.icon;
         return (

@@ -167,7 +167,7 @@ export default function DashboardPage() {
 
       <StatRow stats={stats} loading={loading} />
 
-      <div className="mt-8 grid gap-4 lg:grid-cols-[1.6fr_1fr]">
+      <div className="mt-8 grid gap-4 xl:grid-cols-[1.6fr_1fr]">
         <div>
           <h2 className="text-bone mb-3 text-[13px] font-medium">
             {awaitingMe.length > 0 ? "Needs you" : "Active contracts"}
