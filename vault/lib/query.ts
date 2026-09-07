@@ -11,17 +11,17 @@ import type { QueryClient } from "@tanstack/react-query";
 export const qk = {
   me: () => ["me"] as const,
 
-  campaigns: (filters?: Record<string, unknown>) => ["campaigns", filters ?? {}] as const,
+  campaigns: (filters?: object) => ["campaigns", filters ?? {}] as const,
   campaign: (id: string) => ["campaign", id] as const,
   myCampaigns: () => ["campaigns", "mine"] as const,
 
-  assets: (filters?: Record<string, unknown>) => ["assets", filters ?? {}] as const,
+  assets: (filters?: object) => ["assets", filters ?? {}] as const,
   asset: (id: string) => ["asset", id] as const,
 
   applications: (scope: "mine" | "received") => ["applications", scope] as const,
   application: (id: string) => ["application", id] as const,
 
-  contracts: (filters?: Record<string, unknown>) => ["contracts", filters ?? {}] as const,
+  contracts: (filters?: object) => ["contracts", filters ?? {}] as const,
   contract: (id: string) => ["contract", id] as const,
 
   submissionsForContract: (contractId: string) => ["submissions", "contract", contractId] as const,
@@ -31,7 +31,7 @@ export const qk = {
   transactions: () => ["transactions"] as const,
   connectStatus: () => ["connect-status"] as const,
 
-  notifications: (filters?: Record<string, unknown>) => ["notifications", filters ?? {}] as const,
+  notifications: (filters?: object) => ["notifications", filters ?? {}] as const,
   unreadCount: () => ["notifications", "unread-count"] as const,
   notificationPreferences: () => ["notifications", "preferences"] as const,
 

@@ -67,6 +67,12 @@ export interface Session {
 
 /* ── Campaign ─────────────────────────────────────────────────────────────── */
 
+/**
+ * These mirror `src/modules/campaigns/campaign.types.ts` and must stay
+ * COMPLETE, not merely plausible. A missing member does not fail typecheck —
+ * it fails silently at runtime as a blank badge, because the label lookup
+ * returns undefined for a value the backend happily sends.
+ */
 export const CAMPAIGN_STATUSES = [
   "DRAFT",
   "PUBLISHED",
@@ -74,7 +80,9 @@ export const CAMPAIGN_STATUSES = [
   "FUNDED",
   "IN_PROGRESS",
   "SUBMITTED",
+  "APPROVED",
   "COMPLETED",
+  "DISPUTED",
   "CANCELLED",
 ] as const;
 export type CampaignStatus = (typeof CAMPAIGN_STATUSES)[number];
@@ -86,6 +94,10 @@ export const ASSET_TYPES = [
   "INSTAGRAM_STORY",
   "YOUTUBE_SHORT",
   "YOUTUBE_VIDEO",
+  "TWITTER_PINNED_POST",
+  "TWITTER_HEADER",
+  "BIO_MENTION",
+  "UGC_CONTENT",
 ] as const;
 export type AssetType = (typeof ASSET_TYPES)[number];
 
@@ -96,6 +108,7 @@ export const PLATFORMS = [
   "TWITTER",
   "FACEBOOK",
   "TIKTOK",
+  "OTHER",
 ] as const;
 export type Platform = (typeof PLATFORMS)[number];
 
