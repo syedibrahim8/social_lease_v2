@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Inter, JetBrains_Mono, Playfair_Display } from "next/font/google";
+import { Toaster } from "sonner";
 import { SmoothScroll } from "@/components/motion/smooth-scroll";
+import { QueryProvider } from "@/components/providers/query-provider";
+import { AuthProvider } from "@/lib/auth/auth-provider";
 import "@/styles/globals.css";
 
 /**
@@ -49,7 +52,24 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       className={`${inter.variable} ${playfair.variable} ${jetbrains.variable}`}
     >
       <body>
-        <SmoothScroll>{children}</SmoothScroll>
+        {/* QueryProvider outermost: AuthProvider's session probe and every
+            screen below it read through the same cache. */}
+        <QueryProvider>
+          <AuthProvider>
+            <SmoothScroll>{children}</SmoothScroll>
+            <Toaster
+              theme="dark"
+              position="bottom-right"
+              toastOptions={{
+                style: {
+                  background: "var(--color-surface)",
+                  border: "1px solid var(--color-line-2)",
+                  color: "var(--color-bone)",
+                },
+              }}
+            />
+          </AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );
