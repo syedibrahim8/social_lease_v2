@@ -9,6 +9,59 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { ErrorState } from "@/components/feedback/error-state";
+import { Amount } from "@/components/money/amount";
+import { BalanceCard } from "@/components/money/balance-card";
+import { EscrowTracker } from "@/components/money/escrow-tracker";
+import { LedgerTable } from "@/components/money/ledger-table";
+import type { ContractStatus, Transaction } from "@/lib/api/types";
+
+const DEMO_LEDGER: Transaction[] = [
+  {
+    id: "1",
+    userId: "u",
+    paymentId: "p",
+    contractId: "c",
+    type: "PAYOUT",
+    amount: 900000,
+    currency: "USD",
+    status: "COMPLETED",
+    description: "Payout · Nord Coffee spring reel",
+    createdAt: "2026-09-04T10:00:00.000Z",
+  },
+  {
+    id: "2",
+    userId: "u",
+    paymentId: "p2",
+    contractId: "c2",
+    type: "SPEND",
+    amount: -540000,
+    currency: "USD",
+    status: "COMPLETED",
+    description: "Escrow funded · Atlas Running UGC",
+    createdAt: "2026-09-02T10:00:00.000Z",
+  },
+  {
+    id: "3",
+    userId: "u",
+    paymentId: "p3",
+    contractId: "c3",
+    type: "REFUND",
+    amount: 270000,
+    currency: "USD",
+    status: "COMPLETED",
+    description: "Refund received · Lumen skincare",
+    createdAt: "2026-08-28T10:00:00.000Z",
+  },
+];
+
+const TRACKER_STATES: ContractStatus[] = [
+  "PENDING_FUNDING",
+  "FUNDED",
+  "SUBMITTED",
+  "APPROVED",
+  "COMPLETED",
+  "CANCELLED",
+];
 
 export const metadata: Metadata = { title: "Design system" };
 
@@ -406,6 +459,93 @@ export default function StylePage() {
             </CardBody>
           </Card>
         </div>
+      </Section>
+
+      <Section
+        index="14"
+        title="Amount"
+        note="One component, two voices. display is Playfair with gold decimals — the amount you feel, one per view. figure is mono tabular — the amount you compare, every row and stat. `minor` is always integer minor units; passing dollars would render 100× too small, which is why the prop is named for what it is."
+      >
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div className="space-y-3">
+            <p className="text-faint text-[10px] tracking-wider uppercase">display</p>
+            <Amount minor={4825000} variant="display" className="block text-4xl" />
+            <Amount minor={0} variant="display" className="block text-2xl" />
+            <Amount minor={-270000} variant="display" className="block text-2xl" />
+            <p className="text-muted text-[11px]">
+              Zero renders as $0.00 — prominently. A creator who has earned nothing sees
+              exactly that, never a placeholder.
+            </p>
+          </div>
+          <div className="space-y-2">
+            <p className="text-faint text-[10px] tracking-wider uppercase">figure</p>
+            <Amount minor={4825000} className="block" />
+            <Amount minor={900000} signed className="block" />
+            <Amount minor={-270000} signed className="block" />
+            <Amount minor={0} className="block" />
+            <Amount minor={1240500} currency="EUR" className="block" />
+          </div>
+        </div>
+      </Section>
+
+      <Section
+        index="15"
+        title="Balance card & escrow tracker"
+        note="The tracker maps 1:1 onto the backend's contract statuses — nothing is inferred client-side. CANCELLED and DISPUTED render as their own state rather than a half-finished bar, because showing progress for a dead contract is a lie."
+      >
+        <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+          <BalanceCard
+            label="Available balance"
+            minor={4825000}
+            sub="Settled to your Stripe account · USD"
+            action={
+              <>
+                <Button variant="gold" size="sm">
+                  Withdraw
+                </Button>
+                <Button variant="ghost" size="sm">
+                  Statement
+                </Button>
+              </>
+            }
+          />
+          <Card>
+            <CardHeader>
+              <CardTitle>In escrow</CardTitle>
+            </CardHeader>
+            <CardBody className="pt-3">
+              <Amount minor={1240000} className="mb-4 block text-xl" />
+              <EscrowTracker status="SUBMITTED" />
+            </CardBody>
+          </Card>
+        </div>
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {TRACKER_STATES.map((s) => (
+            <Card key={s}>
+              <CardBody className="space-y-3">
+                <p className="tnum text-faint text-[10px]">{s}</p>
+                <EscrowTracker status={s} />
+              </CardBody>
+            </Card>
+          ))}
+        </div>
+      </Section>
+
+      <Section
+        index="16"
+        title="Ledger"
+        note="Signs are the backend's, never recomputed. A creator's row carries their net of commission; the brand's row for the same payment carries the gross — the two differ by the platform's cut, which is correct accounting."
+      >
+        <LedgerTable transactions={DEMO_LEDGER} />
+      </Section>
+
+      <Section index="17" title="Empty ledger">
+        <LedgerTable transactions={[]} />
+        <p className="text-muted mt-3 text-[11px]">
+          An empty ledger renders its header and nothing else. The screen that owns it pairs
+          this with an EmptyState explaining what would put a row here.
+        </p>
       </Section>
     </main>
   );
