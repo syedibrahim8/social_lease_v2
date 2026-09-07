@@ -153,12 +153,23 @@ export interface Transaction {
   createdAt: string;
 }
 
+/** The slice of a contract that payment reads populate. */
+export interface ContractRef {
+  id: string;
+  status: ContractStatus;
+  agreedPrice: number;
+}
+
 export interface Payment {
   id: string;
-  contractId: string;
-  campaignId: string;
-  brandId: string;
-  creatorId: string;
+  /**
+   * POPULATED on read into { id, status, agreedPrice } — not a bare id. Compare
+   * with refId(), never with ===, or the match silently always fails.
+   */
+  contractId: Ref<ContractRef>;
+  campaignId: Ref<CampaignRef>;
+  brandId: Ref<UserRef>;
+  creatorId: Ref<UserRef>;
   /** Gross, minor units — what the brand paid. */
   amount: number;
   /** Platform fee, minor units. Frozen at checkout. */

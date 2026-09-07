@@ -14,8 +14,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { FundEscrowDialog } from "@/components/contract/fund-escrow-dialog";
 import { ApiError } from "@/lib/api/client";
 import { cancelContract, getContract } from "@/lib/api/endpoints/contracts";
+import { getPaymentForContract } from "@/lib/api/endpoints/payments";
 import { ASSET_TYPE_LABEL, CONTRACT_STATUS, PLATFORM_LABEL } from "@/lib/config/labels";
 import { refOrNull } from "@/lib/api/types";
 import { useAuth } from "@/lib/auth/auth-provider";
@@ -33,6 +35,14 @@ export default function ContractDetailPage({
   const query = useQuery({
     queryKey: qk.contract(id),
     queryFn: () => getContract(id),
+  });
+
+  // Only exists once escrow has been funded. Until then the terms panel falls
+  // back to an estimate and says so.
+  const payment = useQuery({
+    queryKey: qk.payment(id),
+    queryFn: () => getPaymentForContract(id),
+    enabled: query.data !== undefined && query.data.status !== "PENDING_FUNDING",
   });
 
   const cancel = useMutation({
@@ -119,12 +129,41 @@ export default function ContractDetailPage({
                     </CardBody>
                   </Card>
 
-                  {/* Funding, delivery and payout actions mount here in the
-                      following tasks. */}
+                  {/* Money actions. Only the brand can move money, and only
+                      while the contract is waiting to be funded. */}
+                  {!isCreator && contract.status === "PENDING_FUNDING" ? (
+                    <Card>
+                      <CardBody className="flex flex-wrap items-center justify-between gap-4">
+                        <div className="min-w-0">
+                          <p className="text-bone text-[13px] font-medium">
+                            This contract is not funded yet
+                          </p>
+                          <p className="text-muted mt-1 max-w-[52ch] text-xs leading-relaxed">
+                            The creator starts once the money is in escrow. Nothing reaches
+                            them until you approve the delivery.
+                          </p>
+                        </div>
+                        <FundEscrowDialog contract={contract} />
+                      </CardBody>
+                    </Card>
+                  ) : null}
+
+                  {isCreator && contract.status === "PENDING_FUNDING" ? (
+                    <Card>
+                      <CardBody>
+                        <p className="text-muted text-xs leading-relaxed">
+                          Waiting on the brand to fund escrow. You will be notified the moment
+                          the money is held, and that is the point to start work.
+                        </p>
+                      </CardBody>
+                    </Card>
+                  ) : null}
+
+                  {/* Delivery and payout actions mount here in the next tasks. */}
                 </div>
 
                 <div className="space-y-4">
-                  <TermsPanel contract={contract} />
+                  <TermsPanel contract={contract} payment={payment.data} />
 
                   <Card>
                     <CardBody>
