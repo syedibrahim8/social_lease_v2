@@ -11,7 +11,12 @@ import type { Document, Model, Types } from 'mongoose';
 export const PAYMENT_STATUSES = ['PENDING', 'PAID', 'RELEASED', 'REFUNDED', 'FAILED'] as const;
 export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
 
-export const TRANSACTION_TYPES = ['EARNING', 'PAYOUT', 'REFUND'] as const;
+/**
+ * Ledger entry kinds. EARNING/PAYOUT are the creator's side of a contract;
+ * SPEND is the brand's side of funding it. REFUND appears on both sides — the
+ * creator's escrow credit is reversed while the brand's charge comes back.
+ */
+export const TRANSACTION_TYPES = ['EARNING', 'PAYOUT', 'REFUND', 'SPEND'] as const;
 export type TransactionType = (typeof TRANSACTION_TYPES)[number];
 
 export const TRANSACTION_STATUSES = ['PENDING', 'COMPLETED', 'FAILED'] as const;

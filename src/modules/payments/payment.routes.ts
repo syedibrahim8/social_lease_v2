@@ -24,10 +24,13 @@ const router = Router();
 router.post('/connect/onboard', authenticate, authorize('CREATOR'), paymentController.onboard);
 router.get('/connect/status', authenticate, authorize('CREATOR'), paymentController.connectStatus);
 router.get('/wallet', authenticate, authorize('CREATOR'), paymentController.wallet);
+// Both roles have a ledger: creators see EARNING/PAYOUT/REFUND, brands see
+// SPEND/REFUND. `listMyTransactions` already filters by the caller's own
+// userId, so the endpoint is correctly scoped for either.
 router.get(
   '/transactions',
   authenticate,
-  authorize('CREATOR'),
+  authorize(['CREATOR', 'BRAND']),
   validate({ query: listPaymentsQuerySchema }),
   paymentController.transactions
 );

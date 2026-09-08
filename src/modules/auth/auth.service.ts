@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { OAuth2Client } from 'google-auth-library';
 
 import { env } from '@/config/env';
+import { logger } from '@/config/logger';
 import { ApiError } from '@/utils/ApiError';
 import { HttpStatus } from '@/utils/httpStatus';
 import { hashPassword, comparePassword } from '@/utils/password';
@@ -63,7 +64,19 @@ export const authService = {
       isVerified: false,
     });
 
-    await this.sendVerificationEmail(user);
+    // The token write IS awaited: it must exist before the link can be used.
+    // Delivery is not. SMTP round trips were taking ~7s and the caller was
+    // waiting on all of it, so registration felt broken even though the account
+    // was already created. sendMail never throws, and the catch is belt and
+    // braces for a rejection before it gets that far.
+    const link = await this.issueVerificationLink(user);
+    void emailService.sendEmailVerification(user.email, user.name, link).catch((error: unknown) => {
+      logger.error('Verification email failed to send', {
+        userId: user._id.toString(),
+        error: error instanceof Error ? error.message : error,
+      });
+    });
+
     return buildAuthResult(user);
   },
 
@@ -172,16 +185,25 @@ export const authService = {
     await emailService.sendPasswordChanged(user.email, user.name);
   },
 
-  /** Issue + email a fresh verification token. */
-  async sendVerificationEmail(user: IUserDocument): Promise<void> {
+  /**
+   * Persist a fresh verification token and return the link it unlocks.
+   *
+   * Split out from the send so a caller can guarantee the token exists before
+   * responding, without also waiting on outbound mail.
+   */
+  async issueVerificationLink(user: IUserDocument): Promise<string> {
     const token = issueToken(EMAIL_VERIFICATION_TTL_MS);
     await userRepository.setEmailVerificationToken(
       user._id.toString(),
       token.hash,
       token.expiresAt
     );
+    return `${env.WEB_APP_URL}/verify-email?token=${token.raw}`;
+  },
 
-    const link = `${env.WEB_APP_URL}/verify-email?token=${token.raw}`;
+  /** Issue a fresh verification token and wait for the email to be delivered. */
+  async sendVerificationEmail(user: IUserDocument): Promise<void> {
+    const link = await this.issueVerificationLink(user);
     await emailService.sendEmailVerification(user.email, user.name, link);
   },
 

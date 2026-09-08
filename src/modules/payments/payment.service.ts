@@ -246,6 +246,14 @@ export const paymentService = {
     if (contract.brandId.toString() !== brandUserId) {
       throw ApiError.forbidden('Only the contract owner can request a refund');
     }
+    // Proof of work was already accepted. The payout may still be sitting in
+    // escrow (auto-release defers when the creator isn't payout-onboarded yet),
+    // but the brand no longer gets to take the money back — it must be released.
+    if (contract.status === 'APPROVED') {
+      throw ApiError.conflict(
+        'This delivery was approved; the payout must be released, not refunded'
+      );
+    }
 
     const payment = await paymentRepository.findByContractId(contractId);
     if (!payment || payment.status !== 'PAID') {
@@ -270,6 +278,16 @@ export const paymentService = {
       amount: -payment.creatorAmount,
       currency: payment.currency,
       description: `Escrow reversed (refund) for contract ${contractId}`,
+    });
+    // The brand gets the gross charge back, commission included.
+    await transactionRepository.create({
+      userId: payment.brandId,
+      paymentId: payment._id,
+      contractId: contract._id,
+      type: 'REFUND',
+      amount: payment.amount,
+      currency: payment.currency,
+      description: `Refund received for contract ${contractId}`,
     });
 
     contract.status = 'CANCELLED';
@@ -328,6 +346,18 @@ export const paymentService = {
       contractId: payment.contractId,
       type: 'EARNING',
       amount: payment.creatorAmount,
+      currency: payment.currency,
+      description: `Escrow funded for contract ${payment.contractId.toString()}`,
+    });
+    // The brand's mirror of the same movement. Uses the GROSS amount — what the
+    // brand actually paid — so the two sides of the ledger differ by exactly the
+    // platform commission.
+    await transactionRepository.create({
+      userId: payment.brandId,
+      paymentId: payment._id,
+      contractId: payment.contractId,
+      type: 'SPEND',
+      amount: -payment.amount,
       currency: payment.currency,
       description: `Escrow funded for contract ${payment.contractId.toString()}`,
     });

@@ -5,15 +5,16 @@ import globals from 'globals';
 import prettier from 'eslint-config-prettier';
 
 export default tseslint.config(
-  // Ignore build artifacts, dependencies, and the separate web/ frontend app
-  // (it has its own ESLint config + tsconfig; the backend's type-checked rules
-  // must not touch it).
+  // Ignore build artifacts, dependencies, and the separate frontend apps
+  // (each has its own ESLint config + tsconfig; the backend's type-checked
+  // rules must not touch them).
   {
     ignores: [
       'dist/**',
       'node_modules/**',
       'coverage/**',
       'web/**',
+      'vault/**',
       // Standalone dev scripts (run via tsx, not part of the build's tsconfig
       // project) — the type-checked rules can't resolve type info for them.
       'scripts/**',
