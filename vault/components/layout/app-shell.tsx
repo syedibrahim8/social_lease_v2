@@ -6,6 +6,7 @@ import { Logo } from "@/components/layout/logo";
 import { SidebarNav } from "@/components/layout/sidebar-nav";
 import { NotificationBell } from "@/components/layout/notification-bell";
 import { AccountMenu } from "@/components/layout/account-menu";
+import { ProfileBanner } from "@/components/layout/profile-banner";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/lib/auth/auth-provider";
 import { useNotificationStream } from "@/lib/notifications/use-notification-stream";
@@ -101,6 +102,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         {/* tabIndex -1 so the skip link can actually move focus here, not just
             scroll the viewport. */}
         <main id="main" tabIndex={-1} className={cn(CONTAINER, "py-6 outline-none sm:py-8")}>
+          <ProfileBanner />
           {children}
         </main>
       </div>

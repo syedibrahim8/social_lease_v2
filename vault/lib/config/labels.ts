@@ -7,6 +7,7 @@ import type {
   Platform,
   SubmissionStatus,
 } from "@/lib/api/types";
+import type { SocialNetwork } from "@/lib/api/endpoints/profiles";
 
 /**
  * Backend enums are SCREAMING_SNAKE. Screens show words.
@@ -81,6 +82,19 @@ export const PLATFORM_LABEL: Record<Platform, string> = {
   SNAPCHAT: "Snapchat",
   TWITCH: "Twitch",
   OTHER: "Other",
+};
+
+export const SOCIAL_NETWORK_LABEL: Record<SocialNetwork, string> = {
+  instagram: "Instagram",
+  tiktok: "TikTok",
+  youtube: "YouTube",
+  twitter: "X",
+  linkedin: "LinkedIn",
+  facebook: "Facebook",
+  threads: "Threads",
+  pinterest: "Pinterest",
+  snapchat: "Snapchat",
+  twitch: "Twitch",
 };
 
 export const CAMPAIGN_STATUS: Record<CampaignStatus, { label: string; tone: Tone }> = {

@@ -52,7 +52,8 @@ export default function RegisterPage() {
   const onSubmit = handleSubmit(async (values) => {
     try {
       await signUp(values);
-      router.replace("/dashboard");
+      // A new account has no profile yet, and nothing works without one.
+      router.replace("/onboarding");
     } catch (error) {
       applyServerErrors(error, setError, "Could not create your account.");
     }

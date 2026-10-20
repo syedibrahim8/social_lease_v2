@@ -1,8 +1,31 @@
-import { apiGet, apiPatch } from "@/lib/api/client";
+import { apiGet, apiPatch, apiPost } from "@/lib/api/client";
 import type { VerificationState } from "@/lib/api/types";
 
 export const COMPANY_SIZES = ["1-10", "11-50", "51-200", "201-500", "501-1000", "1000+"] as const;
 export type CompanySize = (typeof COMPANY_SIZES)[number];
+
+/** Profile links, one per network. Mirrors the backend's socialLinks schema. */
+export const SOCIAL_NETWORKS = [
+  "instagram",
+  "tiktok",
+  "youtube",
+  "twitter",
+  "linkedin",
+  "facebook",
+  "threads",
+  "pinterest",
+  "snapchat",
+  "twitch",
+] as const;
+export type SocialNetwork = (typeof SOCIAL_NETWORKS)[number];
+export type SocialLinks = Partial<Record<SocialNetwork, string>>;
+
+export interface CreatorMetrics {
+  followers?: number;
+  /** Percent, 0–100. */
+  engagementRate?: number;
+  averageReach?: number;
+}
 
 export interface CreatorProfile {
   id: string;
@@ -15,7 +38,8 @@ export interface CreatorProfile {
   /** Admin-controlled. Rejected from update bodies by the backend's .strict(). */
   verificationStatus: VerificationState;
   profileOwnershipStatus: VerificationState;
-  metrics?: { followers?: number; engagementRate?: number };
+  socialLinks?: SocialLinks;
+  metrics?: CreatorMetrics;
 }
 
 export interface BrandProfile {
@@ -36,9 +60,28 @@ export function getMyCreatorProfile(): Promise<CreatorProfile> {
   return apiGet<CreatorProfile>("/creators/me");
 }
 
-export function updateMyCreatorProfile(
-  input: Partial<Pick<CreatorProfile, "displayName" | "bio" | "niche" | "location">>,
+export type CreatorProfileInput = Partial<
+  Pick<CreatorProfile, "displayName" | "bio" | "niche" | "location" | "profileImage">
+> & { socialLinks?: SocialLinks; metrics?: CreatorMetrics };
+
+export type BrandProfileInput = Partial<
+  Pick<BrandProfile, "companyName" | "logo" | "website" | "industry" | "companySize" | "description">
+>;
+
+/** 409 when the user already has one (one profile per user). */
+export function createCreatorProfile(
+  input: CreatorProfileInput & { displayName: string },
 ): Promise<CreatorProfile> {
+  return apiPost<CreatorProfile>("/creators", input);
+}
+
+export function createBrandProfile(
+  input: BrandProfileInput & { companyName: string },
+): Promise<BrandProfile> {
+  return apiPost<BrandProfile>("/brands", input);
+}
+
+export function updateMyCreatorProfile(input: CreatorProfileInput): Promise<CreatorProfile> {
   return apiPatch<CreatorProfile>("/creators/me", input);
 }
 
@@ -46,10 +89,6 @@ export function getMyBrandProfile(): Promise<BrandProfile> {
   return apiGet<BrandProfile>("/brands/me");
 }
 
-export function updateMyBrandProfile(
-  input: Partial<
-    Pick<BrandProfile, "companyName" | "website" | "industry" | "companySize" | "description">
-  >,
-): Promise<BrandProfile> {
+export function updateMyBrandProfile(input: BrandProfileInput): Promise<BrandProfile> {
   return apiPatch<BrandProfile>("/brands/me", input);
 }

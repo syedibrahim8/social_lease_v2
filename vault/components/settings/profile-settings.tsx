@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ShieldCheck, UserRoundX } from "lucide-react";
@@ -200,6 +201,13 @@ export function ProfileSettings({ isCreator }: { isCreator: boolean }) {
             : query.error instanceof Error
               ? query.error.message
               : "Please try again."
+        }
+        action={
+          notFound ? (
+            <Button asChild size="sm" variant="gold">
+              <Link href="/onboarding">Set up profile</Link>
+            </Button>
+          ) : undefined
         }
       />
     );
