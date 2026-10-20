@@ -328,6 +328,115 @@ async function main(): Promise<void> {
       fraud.body.data?.riskLevel
     );
 
+    // ── Verifications (vault/components/verification/*)
+    const social = await call<{ id: string }>('POST', '/verifications', creator.token, {
+      verificationType: 'SOCIAL_PROFILE',
+      evidence: { profileUrl: 'https://tiktok.com/@fe', handle: '@fe' },
+    });
+    check('a creator requests social profile verification', social.status === 201, detail(social));
+    const again = await call('POST', '/verifications', creator.token, {
+      verificationType: 'SOCIAL_PROFILE',
+      evidence: { profileUrl: 'https://tiktok.com/@fe' },
+    });
+    check('a second pending request of that type is refused (409)', again.status === 409);
+    const identity = await call<{ id: string }>('POST', '/verifications', creator.token, {
+      verificationType: 'IDENTITY',
+      evidence: { documents: ['https://drive.example.com/id.pdf'], note: 'Passport' },
+    });
+    check('identity verification takes document links', identity.status === 201, detail(identity));
+    const noEvidence = await call('POST', '/verifications', brand.token, {
+      verificationType: 'BUSINESS_EMAIL',
+      evidence: {},
+    });
+    check(
+      'missing evidence is refused with a field error',
+      noEvidence.status === 422 || noEvidence.status === 400
+    );
+    const email = await call('POST', '/verifications', brand.token, {
+      verificationType: 'BUSINESS_EMAIL',
+      evidence: { businessEmail: 'ops@example.com' },
+    });
+    check('a brand requests business email verification', email.status === 201, detail(email));
+    const mineV = await call<unknown[]>('GET', '/verifications/mine?limit=100', creator.token);
+    check(
+      'the verification page lists my requests',
+      mineV.status === 200 && mineV.body.data.length === 2
+    );
+
+    const adminEmail = `${PREFIX}-admin@test.local`;
+    await call('POST', '/auth/register', undefined, {
+      name: 'FE Admin',
+      email: adminEmail,
+      password: PASSWORD,
+      role: 'CREATOR',
+    });
+    await UserModel.updateOne({ email: adminEmail }, { $set: { role: 'ADMIN' } });
+    const adminLogin = await call<{ accessToken: string }>('POST', '/auth/login', undefined, {
+      email: adminEmail,
+      password: PASSWORD,
+    });
+    const admin = adminLogin.body.data.accessToken;
+    const queue = await call<{ id: string }[]>(
+      'GET',
+      `/verifications?page=1&limit=20&status=PENDING&role=CREATOR&userId=${creator.id}`,
+      admin
+    );
+    check(
+      'the admin queue filters by status, role and user',
+      queue.status === 200 && queue.body.data.length === 2
+    );
+    const forbidden = await call('GET', '/verifications', creator.token);
+    check('non-admins cannot read the queue', forbidden.status === 403);
+    const approved = await call<{ status: string }>(
+      'POST',
+      `/verifications/${social.body.data.id}/approve`,
+      admin,
+      {}
+    );
+    check(
+      'approve with no note',
+      approved.status === 200 && approved.body.data.status === 'APPROVED',
+      detail(approved)
+    );
+    const rejectNoNote = await call(
+      'POST',
+      `/verifications/${identity.body.data.id}/reject`,
+      admin,
+      {
+        reviewNote: '',
+      }
+    );
+    check(
+      'reject without a note is refused',
+      rejectNoNote.status === 422 || rejectNoNote.status === 400
+    );
+    const rejected = await call('POST', `/verifications/${identity.body.data.id}/reject`, admin, {
+      reviewNote: 'The document is blurry.',
+    });
+    check('reject with a note', rejected.status === 200, detail(rejected));
+    const history = await call<{ action: string }[]>(
+      'GET',
+      `/verifications/${social.body.data.id}/audit`,
+      admin
+    );
+    check(
+      'the review sheet shows the audit trail',
+      history.status === 200 &&
+        history.body.data
+          .map((h) => h.action)
+          .sort()
+          .join(',') === 'APPROVED,SUBMITTED'
+    );
+    const profileAfter = await call<{ verificationStatus: string }>(
+      'GET',
+      '/creators/me',
+      creator.token
+    );
+    check(
+      'approval turns the profile badge to VERIFIED',
+      profileAfter.body.data.verificationStatus === 'VERIFIED'
+    );
+
     // Owner delete paths last.
     const delAsset = await call('DELETE', `/assets/${assetId}`, creator.token);
     const delCampaign = await call('DELETE', `/campaigns/${campaignId}`, brand.token);

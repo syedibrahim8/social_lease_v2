@@ -38,6 +38,13 @@ export const qk = {
   unreadCount: () => ["notifications", "unread-count"] as const,
   notificationPreferences: () => ["notifications", "preferences"] as const,
 
+  myVerifications: () => ["verifications", "mine"] as const,
+  verifications: (filters?: object) => ["verifications", "all", filters ?? {}] as const,
+  verificationAudit: (id: string) => ["verifications", "audit", id] as const,
+
+  analytics: (scope: "platform" | "creator" | "brand", userId?: string) =>
+    ["analytics", scope, userId ?? "me"] as const,
+
   creatorProfile: () => ["profile", "creator"] as const,
   brandProfile: () => ["profile", "brand"] as const,
 } as const;
@@ -66,7 +73,8 @@ export type DomainEvent =
   | "notification"
   | "profile"
   | "campaign"
-  | "asset";
+  | "asset"
+  | "verification";
 
 /** Keys are readonly tuples (`as const`), so the collection type must be too. */
 type QueryKey = readonly unknown[];
@@ -98,6 +106,8 @@ const EVENT_KEYS: Record<DomainEvent, readonly QueryKey[]> = {
   campaign: [qk.campaigns(), qk.myCampaigns()],
   // A creator changed a listing or its calendar.
   asset: [qk.assets(), qk.myAssets(), qk.assetAnalytics()],
+  // A request was submitted or reviewed; approval also changes the profile badge.
+  verification: [qk.myVerifications(), qk.verifications(), qk.creatorProfile(), qk.brandProfile()],
 };
 
 /**

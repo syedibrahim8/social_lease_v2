@@ -48,7 +48,7 @@ function VerificationRow({ label, state }: { label: string; state: VerificationS
     <div className="border-line-2 flex items-center justify-between gap-3 rounded-lg border px-3.5 py-2.5">
       <div className="min-w-0">
         <p className="text-bone-2 text-[13px]">{label}</p>
-        <p className="text-muted mt-0.5 text-[11px]">Set by review. You cannot change this.</p>
+        <p className="text-muted mt-0.5 text-[11px]">Set by review, not editable here.</p>
       </div>
       <Badge tone={VERIFICATION_TONE[state]}>
         {state === "VERIFIED" ? <ShieldCheck aria-hidden="true" /> : null}
@@ -394,7 +394,12 @@ export function ProfileSettings({ isCreator }: { isCreator: boolean }) {
 
       <Card>
         <CardBody className="space-y-2.5">
-          <p className="text-bone text-[13px] font-medium">Verification</p>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-bone text-[13px] font-medium">Verification</p>
+            <Link href="/verifications" className="text-gold-lo text-[12px] hover:underline">
+              Request verification
+            </Link>
+          </div>
           {isCreator ? (
             <>
               <VerificationRow

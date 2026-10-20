@@ -8,6 +8,7 @@ import {
   Megaphone,
   MessagesSquare,
   Settings,
+  ShieldCheck,
   Users,
   Wallet,
 } from "lucide-react";
@@ -27,6 +28,15 @@ export interface NavSection {
 const account: NavSection = {
   label: "Account",
   items: [
+    { label: "Verification", href: "/verifications", icon: ShieldCheck },
+    { label: "Notifications", href: "/notifications", icon: Bell },
+    { label: "Settings", href: "/settings", icon: Settings },
+  ],
+};
+
+const adminAccount: NavSection = {
+  label: "Account",
+  items: [
     { label: "Notifications", href: "/notifications", icon: Bell },
     { label: "Settings", href: "/settings", icon: Settings },
   ],
@@ -40,8 +50,8 @@ const account: NavSection = {
  * creators". Both land on a marketplace; naming it neutrally would make each
  * of them work out which side they are on.
  *
- * ADMIN is out of scope for this slice and deliberately has no nav — the shell
- * says so plainly rather than rendering an empty sidebar.
+ * ADMIN gets the platform tools: the review queue (and, with the analytics
+ * screens, the platform overview).
  */
 export const NAV_BY_ROLE: Record<Role, NavSection[]> = {
   CREATOR: [
@@ -72,10 +82,13 @@ export const NAV_BY_ROLE: Record<Role, NavSection[]> = {
     },
     account,
   ],
-  // An admin gets only what this slice actually built. The verification queue
-  // belongs to the admin slice and has no route here yet, and a nav item
-  // pointing at a 404 is worse than no nav item.
-  ADMIN: [account],
+  ADMIN: [
+    {
+      label: "Admin",
+      items: [{ label: "Verification queue", href: "/admin/verifications", icon: ShieldCheck }],
+    },
+    adminAccount,
+  ],
 };
 
 export function navFor(role: Role): NavSection[] {

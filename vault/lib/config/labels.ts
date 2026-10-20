@@ -8,6 +8,10 @@ import type {
   SubmissionStatus,
 } from "@/lib/api/types";
 import type { SocialNetwork } from "@/lib/api/endpoints/profiles";
+import type {
+  VerificationRequestStatus,
+  VerificationType,
+} from "@/lib/api/endpoints/verifications";
 
 /**
  * Backend enums are SCREAMING_SNAKE. Screens show words.
@@ -95,6 +99,36 @@ export const SOCIAL_NETWORK_LABEL: Record<SocialNetwork, string> = {
   pinterest: "Pinterest",
   snapchat: "Snapchat",
   twitch: "Twitch",
+};
+
+export const VERIFICATION_TYPE_LABEL: Record<
+  VerificationType,
+  { label: string; description: string }
+> = {
+  SOCIAL_PROFILE: {
+    label: "Social profile",
+    description: "Confirms your main channel is real and active.",
+  },
+  PROFILE_OWNERSHIP: {
+    label: "Profile ownership",
+    description: "Confirms the channel is yours, so brands know who they're paying.",
+  },
+  IDENTITY: { label: "Identity", description: "Confirms who you are with an ID document." },
+  WEBSITE: { label: "Website", description: "Confirms your company owns its website." },
+  BUSINESS_EMAIL: {
+    label: "Business email",
+    description: "Confirms you can be reached at a company address.",
+  },
+  COMPANY: { label: "Company", description: "Confirms the company is registered." },
+};
+
+export const VERIFICATION_REQUEST_STATUS: Record<
+  VerificationRequestStatus,
+  { label: string; tone: Tone }
+> = {
+  PENDING: { label: "In review", tone: "warning" },
+  APPROVED: { label: "Verified", tone: "positive" },
+  REJECTED: { label: "Not approved", tone: "negative" },
 };
 
 export const CAMPAIGN_STATUS: Record<CampaignStatus, { label: string; tone: Tone }> = {
