@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { env } from '@/config/env';
 import { ASSET_TYPES, CAMPAIGN_STATUSES, PLATFORMS } from '@/modules/campaigns/campaign.types';
 
 /**
@@ -9,6 +10,15 @@ import { ASSET_TYPES, CAMPAIGN_STATUSES, PLATFORMS } from '@/modules/campaigns/c
  * integers in the smallest currency unit (e.g. cents).
  */
 const objectId = z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid id');
+/** Only currencies the platform can settle; wallets never mix currencies. */
+const currency = z
+  .string()
+  .trim()
+  .length(3)
+  .toUpperCase()
+  .refine((c) => env.SUPPORTED_CURRENCIES.includes(c), {
+    message: `Currency must be one of: ${env.SUPPORTED_CURRENCIES.join(', ')}`,
+  });
 const money = z.number().int('Amount must be an integer (minor units, e.g. cents)').nonnegative();
 
 export const createCampaignSchema = z
@@ -20,7 +30,7 @@ export const createCampaignSchema = z
     duration: z.number().int().positive().max(3650),
     budgetMin: money,
     budgetMax: money,
-    currency: z.string().trim().length(3).toUpperCase().optional(),
+    currency: currency.optional(),
     requirements: z.array(z.string().trim().min(1).max(500)).max(50).optional(),
   })
   .strict()
@@ -38,7 +48,7 @@ export const updateCampaignSchema = z
     duration: z.number().int().positive().max(3650),
     budgetMin: money,
     budgetMax: money,
-    currency: z.string().trim().length(3).toUpperCase(),
+    currency,
     requirements: z.array(z.string().trim().min(1).max(500)).max(50),
   })
   .strict()

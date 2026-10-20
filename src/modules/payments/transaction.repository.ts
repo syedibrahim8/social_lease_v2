@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import { Types, type ClientSession } from 'mongoose';
 import { TransactionModel } from '@/modules/payments/transaction.model';
 import type {
   ITransaction,
@@ -9,9 +9,10 @@ import type { PageParams } from '@/utils/pagination';
 
 export const transactionRepository = {
   create(
-    data: Omit<ITransaction, 'status'> & { status?: ITransaction['status'] }
+    data: Omit<ITransaction, 'status'> & { status?: ITransaction['status'] },
+    session?: ClientSession
   ): Promise<ITransactionDocument> {
-    return new TransactionModel(data).save();
+    return new TransactionModel(data).save({ session: session ?? null });
   },
 
   async listByUser(

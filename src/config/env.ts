@@ -89,6 +89,29 @@ const envSchema = z.object({
   PLATFORM_COMMISSION_PERCENT: z.coerce.number().min(0).max(100).default(2),
   // Default country for creators' Stripe Express connected accounts.
   STRIPE_CONNECT_COUNTRY: z.string().length(2).toUpperCase().default('US'),
+  // Currencies campaigns may be priced in, comma-separated ISO codes. Wallets are
+  // single-currency, so only currencies the platform can settle are accepted.
+  SUPPORTED_CURRENCIES: z
+    .string()
+    .default('USD')
+    .transform((v) =>
+      v
+        .split(',')
+        .map((c) => c.trim().toUpperCase())
+        .filter((c) => /^[A-Z]{3}$/.test(c))
+    )
+    .refine((list) => list.length > 0, 'At least one supported currency is required'),
+  // How often the payment reconciler sweeps for missed webhooks and interrupted
+  // payouts/refunds. 0 disables it.
+  PAYMENT_RECONCILE_INTERVAL_MS: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .default(5 * 60 * 1000),
+
+  // Redis — optional. When set, the rate limiter, the SSE fan-out and the
+  // reconciler lock are shared across instances; unset keeps them in-process.
+  REDIS_URL: z.preprocess((v) => (v === '' ? undefined : v), z.string().url().optional()),
 
   // OpenAI (AI Services module) — optional. When unset, the deterministic cores
   // still run; only the LLM enrichment / brief generation degrades gracefully.

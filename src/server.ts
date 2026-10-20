@@ -3,6 +3,7 @@ import { createApp } from '@/app';
 import { env } from '@/config/env';
 import { logger } from '@/config/logger';
 import { connectDatabase, disconnectDatabase } from '@/config/database';
+import { startPaymentReconcileJob, stopPaymentReconcileJob } from '@/jobs/payment-reconcile.job';
 
 /**
  * Process entry point.
@@ -26,6 +27,7 @@ async function bootstrap(): Promise<void> {
     });
   });
 
+  startPaymentReconcileJob();
   registerShutdownHandlers(server);
 }
 
@@ -45,6 +47,7 @@ function registerShutdownHandlers(server: Server): void {
     forceTimer.unref();
 
     try {
+      stopPaymentReconcileJob();
       await new Promise<void>((resolve, reject) => {
         server.close((err) => (err ? reject(err) : resolve()));
       });

@@ -47,13 +47,28 @@ const paymentSchema = new Schema<IPaymentDocument, IPaymentModel>(
     },
     stripeCheckoutSessionId: { type: String, index: true },
     stripePaymentIntentId: { type: String, index: true },
+    stripeChargeId: { type: String, index: true },
     stripeTransferId: { type: String },
     stripeRefundId: { type: String },
+    transferGroup: { type: String },
+    destinationAccountId: { type: String },
+    checkoutAttempt: { type: Number, default: 0, min: 0 },
+    releaseAttempt: { type: Number, default: 0, min: 0 },
+    refundAttempt: { type: Number, default: 0, min: 0 },
+    checkoutLockUntil: { type: Date },
+    claimedAt: { type: Date },
+    contractStatusBeforeDispute: { type: String },
+    lastError: { type: String, maxlength: 500 },
     paidAt: { type: Date },
     releasedAt: { type: Date },
     refundedAt: { type: Date },
+    disputedAt: { type: Date },
   },
   { timestamps: true, toJSON }
 );
+
+// Reconciler sweep: stale PENDING sessions and interrupted RELEASING/REFUNDING claims.
+paymentSchema.index({ status: 1, claimedAt: 1 });
+paymentSchema.index({ status: 1, updatedAt: 1 });
 
 export const PaymentModel = model<IPaymentDocument, IPaymentModel>('Payment', paymentSchema);

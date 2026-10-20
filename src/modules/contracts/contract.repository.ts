@@ -1,4 +1,4 @@
-import { Types, type FilterQuery } from 'mongoose';
+import { Types, type ClientSession, type FilterQuery } from 'mongoose';
 import { ContractModel } from '@/modules/contracts/contract.model';
 import type {
   ContractStatus,
@@ -39,12 +39,32 @@ export const contractRepository = {
   },
 
   /** Un-populated — for status/ownership mutations. */
-  findDocById(id: string): Promise<IContractDocument | null> {
-    return ContractModel.findById(id).exec();
+  findDocById(id: string, session?: ClientSession): Promise<IContractDocument | null> {
+    return ContractModel.findById(id)
+      .session(session ?? null)
+      .exec();
   },
 
   save(doc: IContractDocument): Promise<IContractDocument> {
     return doc.save();
+  },
+
+  /**
+   * Move a contract from one of `from` to `to` atomically. Returns null when the
+   * contract was not in `from` (it moved concurrently) so callers can react
+   * instead of overwriting a newer state.
+   */
+  transitionStatus(
+    id: string | Types.ObjectId,
+    from: readonly ContractStatus[],
+    to: ContractStatus,
+    session?: ClientSession
+  ): Promise<IContractDocument | null> {
+    return ContractModel.findOneAndUpdate(
+      { _id: id, status: { $in: from } },
+      { $set: { status: to } },
+      { new: true, session: session ?? null }
+    ).exec();
   },
 
   /** Analytics: contract counts + agreed-price totals grouped by status. */

@@ -22,6 +22,7 @@ import { PaymentModel } from '@/modules/payments/payment.model';
 import { TransactionModel } from '@/modules/payments/transaction.model';
 import { WalletModel } from '@/modules/payments/wallet.model';
 import { paymentService } from '@/modules/payments/payment.service';
+import { createPaidPaymentIntent, paidSession } from './lib/stripe-test';
 import type { ContractStatus } from '@/modules/contracts/contract.types';
 import type { PaymentStatus } from '@/modules/payments/payment.types';
 
@@ -135,7 +136,9 @@ async function seedChain(
     creatorAmount,
     currency: 'USD',
     status: paymentStatus,
-    stripePaymentIntentId: 'pi_vault_verification',
+    ...(paymentStatus === 'PENDING'
+      ? {}
+      : { stripePaymentIntentId: `pi_vault_verification_${label}` }),
   });
   created.payments.push(payment._id);
 
@@ -188,11 +191,21 @@ async function main(): Promise<void> {
     // creator's. Drive the webhook handler directly; going through Stripe would
     // need a hosted Checkout session a script can't complete.
     const funded = await seedChain('brand-ledger', 'PENDING_FUNDING', 'PENDING');
-    await paymentService.handleCheckoutCompleted({
-      id: 'cs_test_vault_verification',
-      metadata: { paymentId: funded.paymentId, contractId: funded.contractId },
-      payment_intent: 'pi_vault_verification_funded',
-    } as unknown as Parameters<typeof paymentService.handleCheckoutCompleted>[0]);
+    // The funding handler verifies the charge with Stripe, so it gets a real,
+    // confirmed test PaymentIntent for the exact amount.
+    const intent = await createPaidPaymentIntent(funded.grossAmount, {
+      paymentId: funded.paymentId,
+      contractId: funded.contractId,
+    });
+    await paymentService.applyCheckoutSession(
+      paidSession({
+        sessionId: `cs_test_vault_verification_${funded.paymentId}`,
+        paymentId: funded.paymentId,
+        contractId: funded.contractId,
+        paymentIntentId: intent.id,
+        amount: funded.grossAmount,
+      })
+    );
 
     const brandRows = await TransactionModel.find({ userId: funded.brandId }).lean();
     check('funding writes exactly one brand ledger row', brandRows.length === 1);

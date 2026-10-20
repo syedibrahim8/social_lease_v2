@@ -2,13 +2,28 @@ import type { Document, Model, Types } from 'mongoose';
 
 /**
  * Payment lifecycle (escrow via separate charges & transfers):
- *   PENDING   — checkout created, brand has not paid yet
- *   PAID      — brand paid; funds held by the platform (escrow)
- *   RELEASED  — transferred to the creator's connected account
- *   REFUNDED  — refunded to the brand (only before release)
- *   FAILED    — the charge failed
+ *   PENDING    — checkout created, brand has not paid yet
+ *   PAID       — brand paid; funds held by the platform (escrow)
+ *   RELEASING  — a payout Transfer is in flight (claimed; nothing else may move it)
+ *   RELEASED   — transferred to the creator's connected account
+ *   REFUNDING  — a refund is in flight (claimed, same as RELEASING)
+ *   REFUNDED   — returned to the brand (only before release, or a lost dispute)
+ *   DISPUTED   — the brand's bank opened a chargeback; escrow is frozen
+ *   FAILED     — the charge could not be accepted (e.g. amount mismatch, refunded)
+ *
+ * RELEASING/REFUNDING are claims taken with an atomic conditional update, which
+ * is what makes release and refund mutually exclusive and each single-shot.
  */
-export const PAYMENT_STATUSES = ['PENDING', 'PAID', 'RELEASED', 'REFUNDED', 'FAILED'] as const;
+export const PAYMENT_STATUSES = [
+  'PENDING',
+  'PAID',
+  'RELEASING',
+  'RELEASED',
+  'REFUNDING',
+  'REFUNDED',
+  'DISPUTED',
+  'FAILED',
+] as const;
 export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
 
 /**
@@ -35,11 +50,29 @@ export interface IPayment {
   status: PaymentStatus;
   stripeCheckoutSessionId?: string;
   stripePaymentIntentId?: string;
+  /** The funding charge; payouts use it as `source_transaction`. */
+  stripeChargeId?: string;
   stripeTransferId?: string;
   stripeRefundId?: string;
+  /** `contract-{contractId}`, shared by the charge and the payout Transfer. */
+  transferGroup?: string;
+  /** The connected account the payout was sent to, recorded when it is claimed. */
+  destinationAccountId?: string;
+  /** Attempt counters feed the Stripe idempotency keys (one key per attempt). */
+  checkoutAttempt: number;
+  releaseAttempt: number;
+  refundAttempt: number;
+  /** Short lease that stops two requests creating checkout sessions at once. */
+  checkoutLockUntil?: Date;
+  /** When the current RELEASING/REFUNDING claim was taken (reconciler input). */
+  claimedAt?: Date;
+  /** Contract status to restore if a dispute is decided in the platform's favour. */
+  contractStatusBeforeDispute?: string;
+  lastError?: string;
   paidAt?: Date;
   releasedAt?: Date;
   refundedAt?: Date;
+  disputedAt?: Date;
 }
 
 export interface IPaymentDocument extends IPayment, Document<Types.ObjectId> {
@@ -57,6 +90,8 @@ export interface IWallet {
   availableBalance: number; // released to the creator (lives in Stripe)
   totalEarned: number;
   stripeAccountId?: string;
+  /** Brands: the Stripe Customer every checkout for this brand is bound to. */
+  stripeCustomerId?: string;
   payoutsEnabled: boolean;
   onboardingComplete: boolean;
 }

@@ -43,6 +43,13 @@ router.post(
   validate({ params: contractIdParamsSchema }),
   paymentController.checkout
 );
+router.get(
+  '/contracts/:contractId/sync',
+  authenticate,
+  authorize(['CREATOR', 'BRAND']),
+  validate({ params: contractIdParamsSchema }),
+  paymentController.sync
+);
 router.post(
   '/contracts/:contractId/release',
   authenticate,

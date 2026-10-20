@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { type ClientSession } from 'mongoose';
 import { env, isProduction } from '@/config/env';
 import { logger } from '@/config/logger';
 
@@ -48,4 +48,26 @@ export async function connectDatabase(): Promise<void> {
 export async function disconnectDatabase(): Promise<void> {
   await mongoose.disconnect();
   logger.info('MongoDB connection closed');
+}
+
+/**
+ * Run `fn` inside a MongoDB transaction. Every write that moves money (payment
+ * status, wallet balances, ledger rows, contract/campaign status) goes through
+ * here so a crash part-way leaves nothing half-applied.
+ *
+ * The driver retries `fn` on transient transaction errors, so `fn` must only
+ * touch the database through `session` and have no other side effects (no
+ * Stripe calls, no event emits) — do those before or after.
+ */
+export async function withTransaction<T>(fn: (session: ClientSession) => Promise<T>): Promise<T> {
+  const session = await mongoose.startSession();
+  try {
+    let result: T | undefined;
+    await session.withTransaction(async () => {
+      result = await fn(session);
+    });
+    return result as T;
+  } finally {
+    await session.endSession();
+  }
 }
