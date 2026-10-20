@@ -12,6 +12,8 @@ import { Card, CardBody } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Amount } from "@/components/money/amount";
 import { ApplyDialog } from "@/components/negotiation/apply-dialog";
+import { OwnerActions } from "@/components/campaign/owner-actions";
+import { refId } from "@/lib/api/types";
 import { getCampaign } from "@/lib/api/endpoints/campaigns";
 import { ASSET_TYPE_LABEL, CAMPAIGN_STATUS, PLATFORM_LABEL } from "@/lib/config/labels";
 import { useAuth } from "@/lib/auth/auth-provider";
@@ -24,7 +26,7 @@ export default function CampaignDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { role } = useAuth();
+  const { role, user } = useAuth();
   const [applyOpen, setApplyOpen] = useState(false);
 
   const query = useQuery({
@@ -34,7 +36,9 @@ export default function CampaignDetailPage({
 
   return (
     <>
-      <BackLink href="/marketplace">All campaigns</BackLink>
+      <BackLink href={role === "BRAND" ? "/campaigns/mine" : "/marketplace"}>
+        {role === "BRAND" ? "My campaigns" : "All campaigns"}
+      </BackLink>
 
       <QueryBoundary
         query={query}
@@ -48,12 +52,15 @@ export default function CampaignDetailPage({
       >
         {(campaign) => {
           const status = CAMPAIGN_STATUS[campaign.status];
+          const isOwner = role === "BRAND" && refId(campaign.brandId) === user?.id;
           return (
             <>
               <PageHeader
                 title={campaign.title}
                 action={
-                  role === "CREATOR" && campaign.status === "PUBLISHED" ? (
+                  isOwner ? (
+                    <OwnerActions campaign={campaign} />
+                  ) : role === "CREATOR" && campaign.status === "PUBLISHED" ? (
                     <Button variant="gold" size="sm" onClick={() => setApplyOpen(true)}>
                       Apply
                     </Button>

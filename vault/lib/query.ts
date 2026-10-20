@@ -17,6 +17,9 @@ export const qk = {
 
   assets: (filters?: object) => ["assets", filters ?? {}] as const,
   asset: (id: string) => ["asset", id] as const,
+  myAssets: () => ["assets", "mine"] as const,
+  assetAnalytics: () => ["assets", "analytics"] as const,
+  availability: (id: string) => ["asset", id, "availability"] as const,
 
   applications: (scope: "mine" | "received") => ["applications", scope] as const,
   application: (id: string) => ["application", id] as const,
@@ -61,7 +64,9 @@ export type DomainEvent =
   | "withdraw"
   | "connect"
   | "notification"
-  | "profile";
+  | "profile"
+  | "campaign"
+  | "asset";
 
 /** Keys are readonly tuples (`as const`), so the collection type must be too. */
 type QueryKey = readonly unknown[];
@@ -89,6 +94,10 @@ const EVENT_KEYS: Record<DomainEvent, readonly QueryKey[]> = {
   connect: [qk.connectStatus(), qk.wallet()],
   notification: [qk.notifications(), qk.unreadCount()],
   profile: [qk.creatorProfile(), qk.brandProfile(), qk.me()],
+  // A brand created, edited, published or deleted a campaign.
+  campaign: [qk.campaigns(), qk.myCampaigns()],
+  // A creator changed a listing or its calendar.
+  asset: [qk.assets(), qk.myAssets(), qk.assetAnalytics()],
 };
 
 /**

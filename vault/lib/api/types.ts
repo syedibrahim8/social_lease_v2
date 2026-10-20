@@ -103,6 +103,14 @@ export const CAMPAIGN_STATUSES = [
 ] as const;
 export type CampaignStatus = (typeof CAMPAIGN_STATUSES)[number];
 
+/** Mirrors the backend: terms can change only before creators are engaged. */
+export const EDITABLE_CAMPAIGN_STATUSES: readonly CampaignStatus[] = ["DRAFT", "PUBLISHED"];
+export const DELETABLE_CAMPAIGN_STATUSES: readonly CampaignStatus[] = [
+  "DRAFT",
+  "PUBLISHED",
+  "CANCELLED",
+];
+
 /* ── Social-asset catalogue ─────────────────────────────────────────────────
    Mirrors src/types/assets.ts on the backend: ONE list for campaigns and
    listings alike. Change both together.                                    */
@@ -352,7 +360,8 @@ export interface Contract {
 
 export interface Campaign {
   id: string;
-  brandId: string;
+  /** Populated (name/email/avatar) on reads. */
+  brandId: Ref<UserRef>;
   title: string;
   description: string;
   assetType: AssetType;

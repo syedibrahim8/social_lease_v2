@@ -102,6 +102,37 @@ export function MoneyActions({
     );
   }
 
+  // In-flight and frozen states: say what's happening instead of hiding the panel.
+  if (payment && (payment.status === "RELEASING" || payment.status === "REFUNDING")) {
+    return (
+      <Card>
+        <CardBody>
+          <p className="text-bone text-[13px] font-medium">
+            {payment.status === "RELEASING" ? "Payout on its way" : "Refund on its way"}
+          </p>
+          <p className="text-muted mt-1 max-w-[60ch] text-xs leading-relaxed">
+            Stripe is confirming the {payment.status === "RELEASING" ? "transfer" : "refund"}. It
+            completes automatically, usually within minutes. Nothing else can move this money
+            while it does.
+          </p>
+        </CardBody>
+      </Card>
+    );
+  }
+  if (payment?.status === "DISPUTED") {
+    return (
+      <Card>
+        <CardBody>
+          <p className="text-negative text-[13px] font-medium">Payment disputed</p>
+          <p className="text-muted mt-1 max-w-[60ch] text-xs leading-relaxed">
+            The card issuer opened a dispute on this charge. Escrow is frozen until it is decided:
+            no payout or refund can happen in the meantime.
+          </p>
+        </CardBody>
+      </Card>
+    );
+  }
+
   if (!canRelease && !canRefund) return null;
 
   return (

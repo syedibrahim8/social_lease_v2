@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Amount } from "@/components/money/amount";
 import { EscrowTracker } from "@/components/money/escrow-tracker";
 import { getContract } from "@/lib/api/endpoints/contracts";
-import { getPaymentForContract } from "@/lib/api/endpoints/payments";
+import { getPaymentForContract, syncContractPayment } from "@/lib/api/endpoints/payments";
 import { qk } from "@/lib/query";
 
 const POLL_MS = 1_500;
@@ -48,7 +48,13 @@ export default function PaymentSuccessPage({
 
   const contract = useQuery({
     queryKey: qk.contract(contractId ?? ""),
-    queryFn: () => getContract(contractId as string),
+    queryFn: async () => {
+      // Ask the backend to confirm with Stripe first; if the webhook is late
+      // this is what moves the contract on. A failure here is not fatal — the
+      // webhook will still arrive — so the contract read proceeds regardless.
+      await syncContractPayment(contractId as string).catch(() => null);
+      return getContract(contractId as string);
+    },
     enabled: Boolean(contractId),
     refetchInterval: (query) => {
       const status = query.state.data?.status;

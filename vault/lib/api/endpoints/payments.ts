@@ -75,3 +75,13 @@ export function getConnectStatus(): Promise<ConnectStatus> {
 export function startConnectOnboarding(): Promise<{ onboardingUrl: string }> {
   return apiPost<{ onboardingUrl: string }>("/payments/connect/onboard");
 }
+
+/**
+ * Confirm a contract's checkout with Stripe directly and return the payment.
+ * The success page uses it while the webhook is on its way; it applies through
+ * the same idempotent path, so a webhook arriving later changes nothing.
+ * 404 when the contract has no payment yet.
+ */
+export function syncContractPayment(contractId: string): Promise<Payment> {
+  return apiGet<Payment>(`/payments/contracts/${contractId}/sync`);
+}

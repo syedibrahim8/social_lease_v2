@@ -81,3 +81,19 @@ export function estimateSplit(
   const commissionAmount = Math.round((amount * commissionPercent) / 100);
   return { commissionAmount, creatorAmount: amount - commissionAmount };
 }
+
+/**
+ * Parse an amount typed in whole currency ("1,250.50") into minor units.
+ * Returns null for anything that isn't a non-negative amount with at most two
+ * decimals — the form says so rather than sending a guess.
+ */
+export function parseMajorToMinor(input: string): number | null {
+  const cleaned = input.replace(/[,\s]/g, "");
+  if (!/^\d+(\.\d{1,2})?$/.test(cleaned)) return null;
+  return Math.round(Number(cleaned) * 100);
+}
+
+/** Minor units back into an editable major-unit string ("1250.5" → "1250.50"). */
+export function minorToMajorInput(minor: number): string {
+  return (minor / 100).toFixed(2).replace(/\.00$/, "");
+}

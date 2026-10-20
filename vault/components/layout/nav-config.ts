@@ -3,6 +3,7 @@ import {
   Compass,
   FileText,
   LayoutDashboard,
+  LayoutGrid,
   type LucideIcon,
   Megaphone,
   MessagesSquare,
@@ -49,6 +50,7 @@ export const NAV_BY_ROLE: Record<Role, NavSection[]> = {
       items: [
         { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
         { label: "Find campaigns", href: "/marketplace", icon: Compass },
+        { label: "My listings", href: "/listings", icon: LayoutGrid },
         { label: "Negotiations", href: "/negotiations", icon: MessagesSquare },
         { label: "Contracts", href: "/contracts", icon: FileText },
         { label: "Wallet", href: "/wallet", icon: Wallet },
