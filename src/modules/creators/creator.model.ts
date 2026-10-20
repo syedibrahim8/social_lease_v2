@@ -15,6 +15,11 @@ const socialLinksSchema = new Schema(
     youtube: { type: String, trim: true },
     twitter: { type: String, trim: true },
     facebook: { type: String, trim: true },
+    tiktok: { type: String, trim: true },
+    threads: { type: String, trim: true },
+    pinterest: { type: String, trim: true },
+    snapchat: { type: String, trim: true },
+    twitch: { type: String, trim: true },
   },
   { _id: false }
 );

@@ -21,7 +21,7 @@ import { BrandProfileModel } from '@/modules/brands/brand.model';
 import { CampaignModel } from '@/modules/campaigns/campaign.model';
 import { AssetModel } from '@/modules/assets/asset.model';
 import { NotificationModel } from '@/modules/notifications/notification.model';
-import { ASSET_TYPE_CATEGORY, type MarketplaceAssetType } from '@/modules/assets/asset.types';
+import { ASSET_TYPE_CATEGORY, type AssetType } from '@/modules/assets/asset.types';
 
 const DOMAIN = '@demo.creatormarket.dev';
 const PASSWORD = 'Demo1234!';
@@ -169,7 +169,7 @@ async function seed(): Promise<void> {
       lumen._id,
       'Holiday UGC Bundle',
       'Three authentic UGC clips for paid social.',
-      'UGC_CONTENT',
+      'PRODUCT_REVIEW',
       'TIKTOK',
       100000,
       250000,
@@ -213,7 +213,7 @@ async function seed(): Promise<void> {
       lumen._id,
       'Fintech Explainer Thread',
       'A clear thread explaining how our escrow works.',
-      'TWITTER_PINNED_POST',
+      'X_THREAD',
       'TWITTER',
       100000,
       200000,
@@ -225,7 +225,7 @@ async function seed(): Promise<void> {
   // Assets ----------------------------------------------------------------
   const asset = (
     creatorId: typeof maya._id,
-    assetType: MarketplaceAssetType,
+    assetType: AssetType,
     platform: string,
     title: string,
     description: string,

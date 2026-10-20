@@ -17,6 +17,11 @@ export interface SocialLinks {
   youtube?: string;
   twitter?: string;
   facebook?: string;
+  tiktok?: string;
+  threads?: string;
+  pinterest?: string;
+  snapchat?: string;
+  twitch?: string;
 }
 
 export interface CreatorMetrics {

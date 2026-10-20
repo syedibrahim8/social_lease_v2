@@ -7,9 +7,9 @@ import type {
   IAssetAnalytics,
   IAssetDocument,
   IAudienceDemographics,
-  MarketplaceAssetType,
+  AssetType,
 } from '@/modules/assets/asset.types';
-import type { Platform } from '@/modules/campaigns/campaign.types';
+import type { Platform } from '@/types/assets';
 import type { PageParams } from '@/utils/pagination';
 
 /** Owning creator's public fields, surfaced when an asset is read. */
@@ -20,13 +20,15 @@ type AssetFilter = FilterQuery<IAssetDocument>;
 /** Insert shape — ids arrive as strings (Mongoose casts to ObjectId). */
 interface NewAsset {
   creatorId: string;
-  assetType: MarketplaceAssetType;
+  assetType: AssetType;
   platform: Platform;
   category: AssetCategory;
   title: string;
   description: string;
   estimatedReach?: number | undefined;
   averageViews?: number | undefined;
+  price?: number | undefined;
+  currency?: string | undefined;
   audienceDemographics?: IAudienceDemographics | undefined;
   availability?:
     | { status?: AvailabilityStatus | undefined; leadTimeDays?: number | undefined }

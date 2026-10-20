@@ -18,8 +18,8 @@ import {
   type AssetFilters,
   type AvailabilityStatus,
 } from "@/lib/api/endpoints/assets";
-import { PLATFORM_LABEL } from "@/lib/config/labels";
-import { PLATFORMS, type Platform } from "@/lib/api/types";
+import { ASSET_CATEGORY_LABEL, PLATFORM_LABEL } from "@/lib/config/labels";
+import { ASSET_CATEGORIES, PLATFORMS, type Platform } from "@/lib/api/types";
 import { formatNumber } from "@/lib/money";
 import { qk } from "@/lib/query";
 
@@ -27,11 +27,7 @@ const GROUPS = [
   {
     key: "category",
     label: "Category",
-    options: [
-      { value: "PROFILE", label: "Profile" },
-      { value: "CONTENT", label: "Content" },
-      { value: "UGC", label: "UGC" },
-    ],
+    options: ASSET_CATEGORIES.map((v) => ({ value: v, label: ASSET_CATEGORY_LABEL[v] })),
   },
   {
     key: "platform",

@@ -1,11 +1,8 @@
 import { z } from 'zod';
-import { PLATFORMS } from '@/modules/campaigns/campaign.types';
+import { env } from '@/config/env';
+import { PLATFORMS } from '@/types/assets';
 import { VERIFICATION_STATES } from '@/types/verification';
-import {
-  ASSET_CATEGORIES,
-  AVAILABILITY_STATUSES,
-  MARKETPLACE_ASSET_TYPES,
-} from '@/modules/assets/asset.types';
+import { ASSET_CATEGORIES, AVAILABILITY_STATUSES, ASSET_TYPES } from '@/modules/assets/asset.types';
 
 /**
  * Asset validation schemas. Bodies are `.strict()`: `creatorId`, `category`
@@ -46,12 +43,26 @@ const availabilityInputSchema = z
 
 export const createAssetSchema = z
   .object({
-    assetType: z.enum(MARKETPLACE_ASSET_TYPES),
+    assetType: z.enum(ASSET_TYPES),
     platform: z.enum(PLATFORMS),
     title: z.string().trim().min(3).max(160),
     description: z.string().trim().min(10).max(2000),
     estimatedReach: z.number().int().nonnegative().optional(),
     averageViews: z.number().int().nonnegative().optional(),
+    price: z
+      .number()
+      .int('Price must be an integer (minor units, e.g. cents)')
+      .nonnegative()
+      .optional(),
+    currency: z
+      .string()
+      .trim()
+      .length(3)
+      .toUpperCase()
+      .refine((c) => env.SUPPORTED_CURRENCIES.includes(c), {
+        message: `Currency must be one of: ${env.SUPPORTED_CURRENCIES.join(', ')}`,
+      })
+      .optional(),
     audienceDemographics: audienceDemographicsSchema.optional(),
     availability: availabilityInputSchema.optional(),
   })
@@ -81,12 +92,13 @@ export const listAssetsQuerySchema = z.object({
   limit: z.coerce.number().int().positive().max(100).optional(),
   search: z.string().trim().max(160).optional(),
   category: z.enum(ASSET_CATEGORIES).optional(),
-  assetType: z.enum(MARKETPLACE_ASSET_TYPES).optional(),
+  assetType: z.enum(ASSET_TYPES).optional(),
   platform: z.enum(PLATFORMS).optional(),
   verificationStatus: z.enum(VERIFICATION_STATES).optional(),
   availabilityStatus: z.enum(AVAILABILITY_STATUSES).optional(),
   minReach: z.coerce.number().int().nonnegative().optional(),
   minViews: z.coerce.number().int().nonnegative().optional(),
+  maxPrice: z.coerce.number().int().nonnegative().optional(),
   creatorId: objectId.optional(),
 });
 

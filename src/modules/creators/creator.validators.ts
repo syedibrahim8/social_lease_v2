@@ -19,6 +19,11 @@ const socialLinksSchema = z
     youtube: url.optional(),
     twitter: url.optional(),
     facebook: url.optional(),
+    tiktok: url.optional(),
+    threads: url.optional(),
+    pinterest: url.optional(),
+    snapchat: url.optional(),
+    twitch: url.optional(),
   })
   .strict();
 

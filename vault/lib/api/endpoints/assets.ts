@@ -1,13 +1,11 @@
 import { apiFetch, apiGet, qs } from "@/lib/api/client";
-import type { Paginated, Platform } from "@/lib/api/types";
+import type { AssetCategory, AssetType, Paginated, Platform } from "@/lib/api/types";
 
 /**
- * The marketplace taxonomy is deliberately richer than the campaign one, and
- * separate from it, so listings can evolve without rippling through campaigns,
- * applications, contracts and submissions.
+ * Listings use the same asset catalogue as campaigns (see lib/api/types.ts),
+ * so a brand can campaign for anything a creator can list.
  */
-export const ASSET_CATEGORIES = ["PROFILE", "CONTENT", "UGC"] as const;
-export type AssetCategory = (typeof ASSET_CATEGORIES)[number];
+export type { AssetCategory } from "@/lib/api/types";
 
 export const AVAILABILITY_STATUSES = ["AVAILABLE", "BUSY", "UNAVAILABLE"] as const;
 export type AvailabilityStatus = (typeof AVAILABILITY_STATUSES)[number];
@@ -18,7 +16,7 @@ export interface AssetListing {
   title: string;
   description: string;
   category: AssetCategory;
-  assetType: string;
+  assetType: AssetType;
   platform: Platform;
   /** Minor units. */
   price?: number;
@@ -29,10 +27,18 @@ export interface AssetListing {
   availability: {
     status: AvailabilityStatus;
     leadTimeDays?: number;
-    blocks?: { _id: string; from: string; to: string; reason?: string }[];
+    blocks?: AvailabilityBlock[];
   };
   createdAt: string;
   updatedAt: string;
+}
+
+/** Calendar blocks keep Mongo's `_id` (the subdocument skips toJSON). */
+export interface AvailabilityBlock {
+  _id: string;
+  startDate: string;
+  endDate: string;
+  note?: string;
 }
 
 export interface AssetFilters {
@@ -43,6 +49,8 @@ export interface AssetFilters {
   platform?: Platform;
   availabilityStatus?: AvailabilityStatus;
   minReach?: number;
+  maxPrice?: number;
+  assetType?: AssetType;
   creatorId?: string;
 }
 
