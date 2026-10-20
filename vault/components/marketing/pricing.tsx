@@ -1,15 +1,19 @@
 import { Amount } from "@/components/money/amount";
 import { Reveal } from "@/components/motion/reveal";
+import { PLATFORM_FEE_PERCENT, estimateSplit } from "@/lib/money";
+
+const EXAMPLE_MINOR = 400_000;
+const EXAMPLE = estimateSplit(EXAMPLE_MINOR);
 
 const ROWS: { label: string; minor: number; emphasis?: boolean }[] = [
-  { label: "Contract value", minor: 400_000 },
-  { label: "Platform fee, 10%", minor: -40_000 },
-  { label: "Creator receives", minor: 360_000, emphasis: true },
+  { label: "Contract value", minor: EXAMPLE_MINOR },
+  { label: `Platform fee, ${PLATFORM_FEE_PERCENT}%`, minor: -EXAMPLE.commissionAmount },
+  { label: "Creator receives", minor: EXAMPLE.creatorAmount, emphasis: true },
 ];
 
 /**
  * The real commission, worked through on a real number. A pricing section that
- * says "10%" and stops makes the reader do the arithmetic that decides whether
+ * states a percentage and stops makes the reader do the arithmetic that decides whether
  * they sign up, so it is done for them here, in the same mono figures the
  * ledger uses.
  */
@@ -21,7 +25,7 @@ export function Pricing() {
           <div className="border-line from-emerald-deep grid gap-10 rounded-2xl border bg-gradient-to-br to-[#0B1513] p-8 sm:p-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
             <div>
               <p className="font-display text-gold-lo text-7xl leading-none tracking-tight tabular-nums sm:text-8xl">
-                10%
+                {PLATFORM_FEE_PERCENT}%
               </p>
               <h2 className="font-display text-bone mt-6 text-2xl leading-tight tracking-tight sm:text-3xl">
                 One fee, taken at payout.

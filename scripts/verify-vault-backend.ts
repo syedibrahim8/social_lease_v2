@@ -11,6 +11,7 @@
  */
 import { Types } from 'mongoose';
 import { connectDatabase, disconnectDatabase } from '@/config/database';
+import { env } from '@/config/env';
 import { logger } from '@/config/logger';
 import { hashPassword } from '@/utils/password';
 import { UserModel } from '@/modules/users/user.model';
@@ -122,7 +123,7 @@ async function seedChain(
   });
   created.contracts.push(contract._id);
 
-  const commissionAmount = Math.round((agreedPrice * 10) / 100);
+  const commissionAmount = Math.round((agreedPrice * env.PLATFORM_COMMISSION_PERCENT) / 100);
   const creatorAmount = agreedPrice - commissionAmount;
   const payment = await PaymentModel.create({
     contractId: contract._id,

@@ -74,7 +74,7 @@ export default function RegisterPage() {
             ADMIN is absent because the backend refuses to self-assign it. */}
         <fieldset>
           <legend className="text-bone-2 mb-2 text-xs font-medium">
-            How will you use Vault?
+            How will you use Social Lease?
           </legend>
           <div className="grid gap-2 sm:grid-cols-2">
             {ROLES.map((r) => {

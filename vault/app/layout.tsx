@@ -42,8 +42,8 @@ const jetbrains = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Vault",
-    template: "%s · Vault",
+    default: "Social Lease",
+    template: "%s · Social Lease",
   },
   description:
     "Escrow-backed campaigns between brands and creators. Funds are held before the work starts and released the moment it is approved.",

@@ -1,4 +1,5 @@
 import { CountNumber } from "@/components/motion/count-number";
+import { PLATFORM_FEE_PERCENT } from "@/lib/money";
 
 /**
  * Three facts about how the platform actually works, not three invented
@@ -7,7 +8,7 @@ import { CountNumber } from "@/components/motion/count-number";
  * can start, and the four steps are the ones the escrow tracker shows.
  */
 const FACTS = [
-  { value: 10, suffix: "%", label: "Platform fee, taken once, at payout" },
+  { value: PLATFORM_FEE_PERCENT, suffix: "%", label: "Platform fee, taken once, at payout" },
   { value: 100, suffix: "%", label: "Of the contract funded before work starts" },
   { value: 4, suffix: "", label: "Steps from funded to paid" },
 ];

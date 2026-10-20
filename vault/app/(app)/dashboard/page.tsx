@@ -149,8 +149,8 @@ export default function DashboardPage() {
         <Card>
           <CardBody>
             <p className="text-muted text-[13px] leading-relaxed">
-              Vault covers the creator and brand workflows. Admin review still lives in the
-              original app.
+              You are signed in as an administrator. Review queues and platform metrics are
+              in the admin console.
             </p>
           </CardBody>
         </Card>

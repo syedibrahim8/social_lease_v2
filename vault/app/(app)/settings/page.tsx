@@ -65,7 +65,7 @@ function SettingsBody() {
             <Card>
               <CardBody>
                 <p className="text-muted text-xs leading-relaxed">
-                  Vault never holds your bank details. Stripe does, and money released from
+                  Social Lease never holds your bank details. Stripe does, and money released from
                   escrow goes straight to the account you connected there. Balances and the
                   full ledger live on the wallet screen.
                 </p>

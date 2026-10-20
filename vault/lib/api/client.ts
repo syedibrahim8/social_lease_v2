@@ -3,7 +3,7 @@ import type { ApiFieldError, ApiMeta, ErrorBody, SuccessBody } from "@/lib/api/t
 /**
  * The single seam between this app and the backend.
  *
- * Nothing else in `vault/` calls `fetch`. That matters for one reason above all:
+ * Nothing else in the frontend calls `fetch`. That matters for one reason above all:
  * there is exactly one place where a failed request can be turned into
  * something other than an error, and this file never does that. No fallback, no
  * fixtures, no swallowing. A screen either gets its data or gets to show the

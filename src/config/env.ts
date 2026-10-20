@@ -86,7 +86,7 @@ const envSchema = z.object({
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   // Platform commission taken from each payout, as a percentage (0–100).
-  PLATFORM_COMMISSION_PERCENT: z.coerce.number().min(0).max(100).default(10),
+  PLATFORM_COMMISSION_PERCENT: z.coerce.number().min(0).max(100).default(2),
   // Default country for creators' Stripe Express connected accounts.
   STRIPE_CONNECT_COUNTRY: z.string().length(2).toUpperCase().default('US'),
 

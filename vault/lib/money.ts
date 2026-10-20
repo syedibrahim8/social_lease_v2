@@ -60,6 +60,12 @@ export function splitMoney(minor: number, currency = "USD"): MoneyParts {
 }
 
 /**
+ * The platform fee, as a percentage of the contract value. Mirrors the
+ * backend's PLATFORM_COMMISSION_PERCENT default; change both together.
+ */
+export const PLATFORM_FEE_PERCENT = 2;
+
+/**
  * The platform's cut, mirroring `computeSplit` in the payments service:
  * `commission = round(amount * percent / 100)`, creator gets the remainder.
  *
@@ -70,7 +76,7 @@ export function splitMoney(minor: number, currency = "USD"): MoneyParts {
  */
 export function estimateSplit(
   amount: number,
-  commissionPercent = 10,
+  commissionPercent = PLATFORM_FEE_PERCENT,
 ): { commissionAmount: number; creatorAmount: number } {
   const commissionAmount = Math.round((amount * commissionPercent) / 100);
   return { commissionAmount, creatorAmount: amount - commissionAmount };

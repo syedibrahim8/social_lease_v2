@@ -16,7 +16,7 @@ import {
 import { Amount } from "@/components/money/amount";
 import { ApiError } from "@/lib/api/client";
 import { createCheckout } from "@/lib/api/endpoints/payments";
-import { estimateSplit } from "@/lib/money";
+import { PLATFORM_FEE_PERCENT, estimateSplit } from "@/lib/money";
 import type { Contract } from "@/lib/api/types";
 
 /**
@@ -29,7 +29,7 @@ import type { Contract } from "@/lib/api/types";
  */
 export function FundEscrowDialog({
   contract,
-  commissionPercent = 10,
+  commissionPercent = PLATFORM_FEE_PERCENT,
 }: {
   contract: Contract;
   commissionPercent?: number;

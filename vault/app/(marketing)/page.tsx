@@ -8,9 +8,9 @@ import { Questions } from "@/components/marketing/questions";
 import { ClosingCta } from "@/components/marketing/closing-cta";
 
 export const metadata: Metadata = {
-  // The root layout's template appends "· Vault"; the landing page is the one
+  // The root layout's template appends "· Social Lease"; the landing page is the one
   // place that should read as the product name alone.
-  title: { absolute: "Vault, escrow backed creator campaigns" },
+  title: { absolute: "Social Lease, escrow backed creator campaigns" },
   description:
     "Brands fund escrow before the work starts. Creators deliver, brands approve, and the payout clears the same day through Stripe.",
 };

@@ -195,8 +195,8 @@ export function ProfileSettings({ isCreator }: { isCreator: boolean }) {
         description={
           notFound
             ? isCreator
-              ? "Creating a creator profile is part of onboarding and is not built into Vault yet. The original app can create one."
-              : "Creating a company profile is part of onboarding and is not built into Vault yet. The original app can create one."
+              ? "Set up your creator profile to start applying to campaigns."
+              : "Set up your company profile to start posting campaigns."
             : query.error instanceof Error
               ? query.error.message
               : "Please try again."

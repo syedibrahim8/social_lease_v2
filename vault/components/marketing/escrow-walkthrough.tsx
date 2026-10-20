@@ -7,6 +7,7 @@ import { EscrowTracker } from "@/components/money/escrow-tracker";
 import { Card } from "@/components/ui/card";
 import type { ContractStatus } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
+import { PLATFORM_FEE_PERCENT, estimateSplit } from "@/lib/money";
 
 /**
  * The section that earns the page.
@@ -57,7 +58,7 @@ const STOPS: {
 const FINAL: ContractStatus = "COMPLETED";
 
 const CONTRACT_MINOR = 400_000;
-const PAYOUT_MINOR = 360_000;
+const PAYOUT_MINOR = estimateSplit(CONTRACT_MINOR).creatorAmount;
 
 export function EscrowWalkthrough() {
   const ref = useRef<HTMLDivElement>(null);
@@ -115,7 +116,7 @@ export function EscrowWalkthrough() {
               </p>
               {released ? (
                 <p className="text-muted mt-1 text-[11px]">
-                  <Amount minor={CONTRACT_MINOR} /> contract, less the 10% platform fee.
+                  <Amount minor={CONTRACT_MINOR} /> contract, less the {PLATFORM_FEE_PERCENT}% platform fee.
                 </p>
               ) : null}
               <div className="border-line my-5 border-t" />
