@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Wallet } from "lucide-react";
+import { Sparkles, Wallet } from "lucide-react";
+import { PriceSuggest } from "@/components/ai/price-suggest";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
@@ -50,6 +51,7 @@ export function ApplyDialog({
   const router = useRouter();
   const queryClient = useQueryClient();
   const [price, setPrice] = useState("");
+  const [showSuggest, setShowSuggest] = useState(false);
   const [reach, setReach] = useState("");
   const [proposal, setProposal] = useState("");
   const [blockedOnPayouts, setBlockedOnPayouts] = useState(false);
@@ -142,6 +144,23 @@ export function ApplyDialog({
                   placeholder="2500.00"
                 />
               </Field>
+
+              {showSuggest ? (
+                <PriceSuggest
+                  platform={campaign.platform}
+                  assetType={campaign.assetType}
+                  onApply={(minor) => setPrice((minor / 100).toFixed(2))}
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowSuggest(true)}
+                  className="text-gold-lo -mt-2 inline-flex min-h-9 items-center gap-1.5 self-start text-[12px] hover:underline"
+                >
+                  <Sparkles className="size-3.5" aria-hidden="true" />
+                  Not sure? Suggest a price
+                </button>
+              )}
 
               <Field
                 label="Estimated reach"

@@ -131,6 +131,24 @@ export const VERIFICATION_REQUEST_STATUS: Record<
   REJECTED: { label: "Not approved", tone: "negative" },
 };
 
+export const PAYMENT_STATUS_LABEL: Record<string, string> = {
+  PENDING: "Awaiting payment",
+  PAID: "In escrow",
+  RELEASING: "Payout in flight",
+  RELEASED: "Paid out",
+  REFUNDING: "Refund in flight",
+  REFUNDED: "Refunded",
+  DISPUTED: "Disputed",
+  FAILED: "Failed",
+};
+
+export const TRANSACTION_TYPE_LABEL: Record<string, string> = {
+  EARNING: "Escrow credit (creator)",
+  SPEND: "Escrow funding (brand)",
+  PAYOUT: "Payout",
+  REFUND: "Refund",
+};
+
 export const CAMPAIGN_STATUS: Record<CampaignStatus, { label: string; tone: Tone }> = {
   DRAFT: { label: "Draft", tone: "muted" },
   PUBLISHED: { label: "Open to applications", tone: "info" },

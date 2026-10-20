@@ -35,6 +35,8 @@ export function DialogContent({
       <DialogPrimitive.Content
         className={cn(
           "border-line-2 bg-ink-2 fixed top-1/2 left-1/2 z-50 w-[calc(100vw-2rem)] max-w-md",
+          // Never taller than the screen; long dialogs scroll inside themselves.
+          "max-h-[calc(100dvh-2rem)] overflow-y-auto",
           "-translate-x-1/2 -translate-y-1/2 rounded-2xl border p-6",
           "shadow-[var(--shadow-lift)]",
           "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",

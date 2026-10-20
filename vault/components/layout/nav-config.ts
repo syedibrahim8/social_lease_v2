@@ -1,5 +1,6 @@
 import {
   Bell,
+  ChartColumn,
   Compass,
   FileText,
   LayoutDashboard,
@@ -64,6 +65,7 @@ export const NAV_BY_ROLE: Record<Role, NavSection[]> = {
         { label: "Negotiations", href: "/negotiations", icon: MessagesSquare },
         { label: "Contracts", href: "/contracts", icon: FileText },
         { label: "Wallet", href: "/wallet", icon: Wallet },
+        { label: "Analytics", href: "/analytics", icon: ChartColumn },
       ],
     },
     account,
@@ -78,6 +80,7 @@ export const NAV_BY_ROLE: Record<Role, NavSection[]> = {
         { label: "Negotiations", href: "/negotiations", icon: MessagesSquare },
         { label: "Contracts", href: "/contracts", icon: FileText },
         { label: "Wallet", href: "/wallet", icon: Wallet },
+        { label: "Analytics", href: "/analytics", icon: ChartColumn },
       ],
     },
     account,
@@ -85,7 +88,10 @@ export const NAV_BY_ROLE: Record<Role, NavSection[]> = {
   ADMIN: [
     {
       label: "Admin",
-      items: [{ label: "Verification queue", href: "/admin/verifications", icon: ShieldCheck }],
+      items: [
+        { label: "Overview", href: "/admin", icon: LayoutDashboard },
+        { label: "Verification queue", href: "/admin/verifications", icon: ShieldCheck },
+      ],
     },
     adminAccount,
   ],
@@ -97,6 +103,6 @@ export function navFor(role: Role): NavSection[] {
 
 /** Active when the path equals the href or sits beneath it. */
 export function isNavActive(pathname: string, href: string): boolean {
-  if (href === "/dashboard") return pathname === href;
+  if (href === "/dashboard" || href === "/admin") return pathname === href;
   return pathname === href || pathname.startsWith(`${href}/`);
 }

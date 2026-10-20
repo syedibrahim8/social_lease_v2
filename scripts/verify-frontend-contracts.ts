@@ -437,6 +437,49 @@ async function main(): Promise<void> {
       profileAfter.body.data.verificationStatus === 'VERIFIED'
     );
 
+    // ── Analytics (vault/app/(app)/analytics + admin overview)
+    const platform = await call<{
+      users: { total: number };
+      campaignsByStatus: object;
+      transactionsByType: object;
+    }>('GET', '/analytics/platform', admin);
+    check(
+      'the admin overview loads platform analytics',
+      platform.status === 200 &&
+        platform.body.data.users.total > 0 &&
+        typeof platform.body.data.campaignsByStatus === 'object' &&
+        typeof platform.body.data.transactionsByType === 'object'
+    );
+    const platformDenied = await call('GET', '/analytics/platform', brand.token);
+    check('platform analytics is admin-only', platformDenied.status === 403);
+    const ownCreator = await call<{
+      conversion: { conversionRate: number };
+      assetPerformance: object;
+    }>('GET', '/analytics/creator', creator.token);
+    check(
+      'a creator loads their own analytics (rates are 0–1)',
+      ownCreator.status === 200 &&
+        ownCreator.body.data.conversion.conversionRate >= 0 &&
+        ownCreator.body.data.conversion.conversionRate <= 1
+    );
+    const ownBrand = await call<{ roi: { note: string }; campaigns: { completionRate: number } }>(
+      'GET',
+      '/analytics/brand',
+      brand.token
+    );
+    check(
+      'a brand loads their own analytics with the ROI caveat',
+      ownBrand.status === 200 && ownBrand.body.data.roi.note.length > 0
+    );
+    const adminView = await call('GET', `/analytics/creator?userId=${creator.id}`, admin);
+    check(
+      "an admin opens a creator's analytics from the queue",
+      adminView.status === 200,
+      detail(adminView)
+    );
+    const adminNoUser = await call('GET', '/analytics/brand', admin);
+    check('an admin must say whose analytics (400)', adminNoUser.status === 400);
+
     // Owner delete paths last.
     const delAsset = await call('DELETE', `/assets/${assetId}`, creator.token);
     const delCampaign = await call('DELETE', `/campaigns/${campaignId}`, brand.token);
