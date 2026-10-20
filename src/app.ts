@@ -12,6 +12,7 @@ import { notFound } from '@/middleware/notFound.middleware';
 import { errorHandler } from '@/middleware/error.middleware';
 import { ApiError } from '@/utils/ApiError';
 import { stripeWebhookHandler } from '@/modules/payments/payment.webhook';
+import { notificationStream } from '@/modules/notifications/notification.stream';
 import { registerNotificationListeners } from '@/modules/notifications/notification.listeners';
 
 /**
@@ -35,6 +36,8 @@ export function createApp(): Application {
 
   // Subscribe the notifications module to domain events (idempotent).
   registerNotificationListeners();
+  // With Redis, receive live notifications published by other instances.
+  notificationStream.init();
 
   // Trust the first proxy hop (needed for correct IPs + rate limiting on PaaS).
   app.set('trust proxy', 1);

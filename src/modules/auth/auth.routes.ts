@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
+import { rateLimitStore } from '@/middleware/rateLimiter.middleware';
 import { authController } from '@/modules/auth/auth.controller';
 import { authenticate } from '@/middleware/authenticate.middleware';
 import { validate } from '@/middleware/validate.middleware';
@@ -26,6 +27,7 @@ const credentialsLimiter = rateLimit({
   limit: 10,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
+  ...rateLimitStore('auth'),
   message: { success: false, message: 'Too many attempts, please try again later.', errors: [] },
 });
 
