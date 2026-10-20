@@ -1,22 +1,25 @@
-# Vault
+# Social Lease — web app
 
-The second frontend for this repo. `web/` is the first one and is untouched by
-this work; the two are independent apps that talk to the same Express API.
+The frontend for Social Lease (it lives in `vault/`, its working name). It talks
+only to the live Express API at `/api/v1`: no mock mode, no fixtures. Dark only,
+by commitment.
 
-|                | `web/`                                  | `vault/`                                       |
-| -------------- | --------------------------------------- | ---------------------------------------------- |
-| Port           | 3000                                     | 3001                                           |
-| Data           | Mock adapter with fixtures               | Live `/api/v1` only. No mock mode, no fixtures |
-| Scope          | Broad, screen-first                      | The money spine, end to end                    |
-| Theme          | Light and dark                           | Dark only, by commitment                       |
+What it covers:
 
-The scope is deliberate: landing, auth, marketplace, negotiation, contract,
-real Stripe checkout, delivery, approval, payout, wallet, notifications with a
-live stream, and settings. Admin, the AI services and the deep analytics pages
-belong to a later slice and are not stubbed here.
+- **Accounts:** sign-up, sign-in, email verification, password reset, and
+  first-run profile onboarding for creators and brands.
+- **Brands:** post, edit and publish campaigns (with an AI brief draft), browse
+  creator listings or a ranked shortlist, run an audience risk check.
+- **Creators:** list assets with prices and an availability calendar, apply to
+  campaigns (with a price suggestion), negotiate.
+- **Money:** contracts, real Stripe Checkout into escrow, delivery and approval,
+  payout or refund, wallets and ledgers. The platform fee is 2%.
+- **Trust:** verification requests, and an admin review queue.
+- **Insight:** analytics for creators and brands, and an admin platform overview.
+- Notifications with a live stream, and settings (profile, channels, security,
+  payouts, notification preferences).
 
-There are no fixtures anywhere. An account with no data renders a designed
-empty state on every screen, which is checked as part of the release sweep.
+An account with no data renders a designed empty state on every screen.
 
 ## Running it
 
@@ -35,9 +38,6 @@ pnpm install
 cp .env.example .env.local
 pnpm dev            # Next.js on :3001
 ```
-
-`web/` still runs on :3000 with its own `pnpm dev`, and the two frontends can
-be up at the same time.
 
 ### Environment
 
@@ -78,8 +78,9 @@ pnpm seed:demo      # demo users, campaigns and assets. Password: Demo1234!
 pnpm unseed:demo    # remove them again
 ```
 
-The demo accounts are `maya@demo.creatormarket.dev` (creator) and
-`northwind@demo.creatormarket.dev` (brand). `scripts/seed-negotiation.ts`
+The demo accounts are `maya@demo.creatormarket.dev` (creator),
+`northwind@demo.creatormarket.dev` (brand) and `admin@demo.creatormarket.dev`
+(admin). `scripts/seed-negotiation.ts`
 adds an accepted application and the contract it generates, which is the
 quickest way to reach the funding screen.
 
@@ -87,6 +88,7 @@ quickest way to reach the funding screen.
 
 ```bash
 cd vault && pnpm typecheck && pnpm lint && pnpm build
+cd .. && pnpm tsx scripts/verify-frontend-contracts.ts   # the payloads these screens send, over real HTTP
 ```
 
 The root `pnpm lint` and `pnpm format` ignore `vault/`, which has its own flat
@@ -98,12 +100,14 @@ ESLint config and Prettier settings.
 app/
   (marketing)/   landing
   (auth)/        login, register, verify-email, forgot, reset
-  (app)/         the authenticated shell
+  (app)/         the authenticated shell (onboarding, campaigns, listings,
+                 verifications, admin, analytics, …)
   style/         the design system, rendered, with measured contrast ratios
 components/
   ui/            primitives written for this app
   money/         Amount, BalanceCard, EscrowTracker, LedgerTable
   marketing/ contract/ negotiation/ marketplace/ wallet/ settings/
+  campaign/ assets/ verification/ ai/ charts/
   motion/        Reveal, CountUp, CountNumber, PayoutRelease, SmoothScroll
 lib/
   api/           client, typed contracts, endpoints, the SSE stream
