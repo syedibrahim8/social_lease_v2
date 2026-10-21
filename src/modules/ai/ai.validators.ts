@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ASSET_TYPES, PLATFORMS } from '@/modules/campaigns/campaign.types';
+import { ASSET_TYPES, PLATFORMS } from '@/types/assets';
 
 /** Engagement rate is a percentage (e.g. 3.5 = 3.5%). */
 const engagementRate = z.number().min(0).max(100);
@@ -34,7 +34,7 @@ export const pricingSchema = z
     platform: z.enum(PLATFORMS),
     followers: z.number().int().nonnegative(),
     engagementRate,
-    assetType: z.string().trim().min(1).max(60),
+    assetType: z.enum(ASSET_TYPES),
     currency: z.string().trim().length(3).toUpperCase().optional(),
   })
   .strict();

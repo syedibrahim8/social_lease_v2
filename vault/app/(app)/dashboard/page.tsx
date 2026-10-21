@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import {
   Banknote,
@@ -142,21 +144,7 @@ export default function DashboardPage() {
         },
       ];
 
-  if (role === "ADMIN") {
-    return (
-      <>
-        <PageHeader title={`Welcome back, ${firstName}`} />
-        <Card>
-          <CardBody>
-            <p className="text-muted text-[13px] leading-relaxed">
-              Vault covers the creator and brand workflows. Admin review still lives in the
-              original app.
-            </p>
-          </CardBody>
-        </Card>
-      </>
-    );
-  }
+  if (role === "ADMIN") return <AdminRedirect />;
 
   return (
     <>
@@ -241,4 +229,13 @@ export default function DashboardPage() {
       </div>
     </>
   );
+}
+
+/** Admins have no workspace dashboard; their home is the platform overview. */
+function AdminRedirect() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace("/admin");
+  }, [router]);
+  return null;
 }

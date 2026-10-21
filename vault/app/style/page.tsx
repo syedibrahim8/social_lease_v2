@@ -123,7 +123,7 @@ export default function StylePage() {
     <main className="mx-auto max-w-5xl px-6 py-14">
       <header className="mb-4">
         <p className="text-gold text-[10px] font-semibold tracking-[0.2em] uppercase">
-          Vault
+          Social Lease
         </p>
         <h1 className="font-display mt-3 text-4xl">
           The system, <em className="text-gold italic">measured.</em>

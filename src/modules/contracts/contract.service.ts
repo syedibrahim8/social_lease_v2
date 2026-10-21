@@ -1,6 +1,7 @@
 import { ApiError } from '@/utils/ApiError';
 import { resolvePagination, buildPaginationMeta, type Paginated } from '@/utils/pagination';
 import { campaignRepository } from '@/modules/campaigns/campaign.repository';
+import { paymentService } from '@/modules/payments/payment.service';
 import type { ICampaignDocument } from '@/modules/campaigns/campaign.types';
 import type { IApplicationDocument } from '@/modules/applications/application.types';
 import { contractRepository, type ContractFilter } from '@/modules/contracts/contract.repository';
@@ -69,10 +70,20 @@ export const contractService = {
     if (!CANCELLABLE_CONTRACT_STATUSES.includes(contract.status)) {
       throw ApiError.conflict(`A contract in status ${contract.status} can no longer be cancelled`);
     }
-    contract.status = 'CANCELLED';
-    await contractRepository.save(contract);
+    // Atomic: a funding webhook landing at the same moment either sees the
+    // contract still fundable (and wins) or sees it cancelled (and refunds).
+    const cancelled = await contractRepository.transitionStatus(
+      id,
+      CANCELLABLE_CONTRACT_STATUSES,
+      'CANCELLED'
+    );
+    if (!cancelled) {
+      throw ApiError.conflict('The contract changed while cancelling it; reload and try again');
+    }
     await campaignRepository.updateById(contract.campaignId.toString(), { status: 'CANCELLED' });
-    return (await contractRepository.findById(id)) ?? contract;
+    // Close the checkout so the brand can't pay for a cancelled contract.
+    await paymentService.expireOpenCheckout(id);
+    return (await contractRepository.findById(id)) ?? cancelled;
   },
 
   // --- internal ----------------------------------------------------------

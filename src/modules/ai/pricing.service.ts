@@ -1,41 +1,68 @@
 import { aiProvider } from '@/modules/ai/ai.provider';
+import type { AssetType, Platform } from '@/types/assets';
 import type { PricingResult } from '@/modules/ai/ai.types';
 import type { PricingInput } from '@/modules/ai/ai.validators';
 
 /** Baseline rate in minor units (cents) per 1,000 followers, by platform. */
-const PLATFORM_RATE: Record<string, number> = {
+const PLATFORM_RATE: Record<Platform, number> = {
   INSTAGRAM: 1000,
   YOUTUBE: 2500,
   TIKTOK: 800,
   LINKEDIN: 1500,
   TWITTER: 700,
   FACEBOOK: 600,
+  THREADS: 600,
+  PINTEREST: 700,
+  SNAPCHAT: 600,
+  TWITCH: 1800,
   OTHER: 500,
 };
 
-/** Asset-type effort/value multipliers (substring matched, case-insensitive). */
-const ASSET_MULTIPLIERS: ReadonlyArray<{ match: string; mult: number }> = [
-  { match: 'video', mult: 2 },
-  { match: 'reel', mult: 1.3 },
-  { match: 'short', mult: 1.2 },
-  { match: 'thread', mult: 1.1 },
-  { match: 'post', mult: 1 },
-  { match: 'story', mult: 0.6 },
-  { match: 'banner', mult: 0.5 },
-  { match: 'header', mult: 0.5 },
-  { match: 'bio', mult: 0.4 },
-  { match: 'mention', mult: 0.4 },
-];
+/**
+ * Effort/value multiplier per asset type. A typed map rather than substring
+ * matching, so every type in the shared catalogue has a deliberate price and a
+ * new type can't be added without one (the compiler insists).
+ */
+const ASSET_MULTIPLIER: Record<AssetType, number> = {
+  LINKEDIN_BANNER: 0.5,
+  LINKEDIN_FEATURED_POST: 0.8,
+  X_HEADER: 0.5,
+  X_PINNED_POST: 0.7,
+  INSTAGRAM_BIO_LINK: 0.4,
+  INSTAGRAM_PINNED_POST: 0.8,
+  YOUTUBE_CHANNEL_BANNER: 0.5,
+  TIKTOK_BIO_LINK: 0.4,
+  TIKTOK_PINNED_VIDEO: 1.1,
+  FACEBOOK_COVER: 0.5,
+  THREADS_PINNED_POST: 0.6,
+  PINTEREST_BOARD: 0.7,
+  TWITCH_PANEL: 0.5,
+  INSTAGRAM_POST: 1,
+  INSTAGRAM_CAROUSEL: 1.2,
+  INSTAGRAM_REEL: 1.3,
+  INSTAGRAM_STORY: 0.6,
+  YOUTUBE_VIDEO: 2,
+  YOUTUBE_SHORT: 1.2,
+  YOUTUBE_VLOG: 1.6,
+  LINKEDIN_POST: 1,
+  X_POST: 0.8,
+  X_THREAD: 1.1,
+  TIKTOK_VIDEO: 1.3,
+  FACEBOOK_POST: 0.8,
+  FACEBOOK_REEL: 1.1,
+  FACEBOOK_STORY: 0.5,
+  THREADS_POST: 0.7,
+  PINTEREST_PIN: 0.8,
+  SNAPCHAT_STORY: 0.6,
+  SNAPCHAT_SPOTLIGHT: 1,
+  TWITCH_STREAM_MENTION: 1.2,
+  PRODUCT_REVIEW: 1.4,
+  TESTIMONIAL_VIDEO: 1.5,
+  PRODUCT_DEMO: 1.6,
+  UNBOXING_VIDEO: 1.4,
+};
 
 const ENGAGEMENT_BASELINE = 3; // % — average engagement maps to a 1.0 multiplier.
-
-function assetMultiplier(assetType: string): number {
-  const a = assetType.toLowerCase();
-  for (const { match, mult } of ASSET_MULTIPLIERS) {
-    if (a.includes(match)) return mult;
-  }
-  return 1;
-}
 
 /**
  * Pricing Recommendation.
@@ -47,8 +74,8 @@ function assetMultiplier(assetType: string): number {
 export const pricingService = {
   async recommend(input: PricingInput): Promise<PricingResult> {
     const currency = input.currency ?? 'USD';
-    const baseRate = PLATFORM_RATE[input.platform] ?? 500;
-    const assetMult = assetMultiplier(input.assetType);
+    const baseRate = PLATFORM_RATE[input.platform];
+    const assetMult = ASSET_MULTIPLIER[input.assetType];
     const engagementMult = Math.max(0.5, Math.min(2.5, input.engagementRate / ENGAGEMENT_BASELINE));
     const ratePerThousand = Math.round(baseRate * assetMult);
 

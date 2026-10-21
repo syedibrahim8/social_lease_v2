@@ -15,10 +15,15 @@ export function SheetContent({
   className,
   children,
   title,
+  side = "left",
   onOpenAutoFocus,
   onCloseAutoFocus,
   ...props
-}: React.ComponentProps<typeof SheetPrimitive.Content> & { title: string }) {
+}: React.ComponentProps<typeof SheetPrimitive.Content> & {
+  title: string;
+  /** Navigation opens from the left; detail panels open from the right. */
+  side?: "left" | "right";
+}) {
   // Same reason as the dialog: the drawer is controlled, so Radix has no
   // trigger ref to hand focus back to. See lib/use-return-focus.ts.
   const focusHandlers = useReturnFocus({ onOpenAutoFocus, onCloseAutoFocus });
@@ -28,9 +33,10 @@ export function SheetContent({
       <SheetPrimitive.Overlay className="fixed inset-0 z-50 bg-black/70 backdrop-blur-[2px]" />
       <SheetPrimitive.Content
         className={cn(
-          "bg-ink-2 border-line-2 fixed inset-y-0 left-0 z-50 w-72 border-r p-4",
-          "data-[state=open]:animate-in data-[state=open]:slide-in-from-left",
-          "data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left",
+          "bg-ink-2 border-line-2 fixed inset-y-0 z-50 w-72 p-4",
+          side === "left"
+            ? "left-0 border-r data-[state=open]:animate-in data-[state=open]:slide-in-from-left data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left"
+            : "right-0 border-l data-[state=open]:animate-in data-[state=open]:slide-in-from-right data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right",
           className,
         )}
         {...focusHandlers}

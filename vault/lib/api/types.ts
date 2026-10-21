@@ -103,19 +103,17 @@ export const CAMPAIGN_STATUSES = [
 ] as const;
 export type CampaignStatus = (typeof CAMPAIGN_STATUSES)[number];
 
-export const ASSET_TYPES = [
-  "LINKEDIN_BANNER",
-  "LINKEDIN_POST",
-  "INSTAGRAM_REEL",
-  "INSTAGRAM_STORY",
-  "YOUTUBE_SHORT",
-  "YOUTUBE_VIDEO",
-  "TWITTER_PINNED_POST",
-  "TWITTER_HEADER",
-  "BIO_MENTION",
-  "UGC_CONTENT",
-] as const;
-export type AssetType = (typeof ASSET_TYPES)[number];
+/** Mirrors the backend: terms can change only before creators are engaged. */
+export const EDITABLE_CAMPAIGN_STATUSES: readonly CampaignStatus[] = ["DRAFT", "PUBLISHED"];
+export const DELETABLE_CAMPAIGN_STATUSES: readonly CampaignStatus[] = [
+  "DRAFT",
+  "PUBLISHED",
+  "CANCELLED",
+];
+
+/* ── Social-asset catalogue ─────────────────────────────────────────────────
+   Mirrors src/types/assets.ts on the backend: ONE list for campaigns and
+   listings alike. Change both together.                                    */
 
 export const PLATFORMS = [
   "LINKEDIN",
@@ -124,9 +122,112 @@ export const PLATFORMS = [
   "TWITTER",
   "FACEBOOK",
   "TIKTOK",
+  "THREADS",
+  "PINTEREST",
+  "SNAPCHAT",
+  "TWITCH",
   "OTHER",
 ] as const;
 export type Platform = (typeof PLATFORMS)[number];
+
+export const ASSET_CATEGORIES = ["PROFILE_ASSETS", "CONTENT_ASSETS", "UGC_ASSETS"] as const;
+export type AssetCategory = (typeof ASSET_CATEGORIES)[number];
+
+export const ASSET_TYPES = [
+  "LINKEDIN_BANNER",
+  "LINKEDIN_FEATURED_POST",
+  "X_HEADER",
+  "X_PINNED_POST",
+  "INSTAGRAM_BIO_LINK",
+  "INSTAGRAM_PINNED_POST",
+  "YOUTUBE_CHANNEL_BANNER",
+  "TIKTOK_BIO_LINK",
+  "TIKTOK_PINNED_VIDEO",
+  "FACEBOOK_COVER",
+  "THREADS_PINNED_POST",
+  "PINTEREST_BOARD",
+  "TWITCH_PANEL",
+  "INSTAGRAM_POST",
+  "INSTAGRAM_CAROUSEL",
+  "INSTAGRAM_REEL",
+  "INSTAGRAM_STORY",
+  "YOUTUBE_VIDEO",
+  "YOUTUBE_SHORT",
+  "YOUTUBE_VLOG",
+  "LINKEDIN_POST",
+  "X_POST",
+  "X_THREAD",
+  "TIKTOK_VIDEO",
+  "FACEBOOK_POST",
+  "FACEBOOK_REEL",
+  "FACEBOOK_STORY",
+  "THREADS_POST",
+  "PINTEREST_PIN",
+  "SNAPCHAT_STORY",
+  "SNAPCHAT_SPOTLIGHT",
+  "TWITCH_STREAM_MENTION",
+  "PRODUCT_REVIEW",
+  "TESTIMONIAL_VIDEO",
+  "PRODUCT_DEMO",
+  "UNBOXING_VIDEO",
+] as const;
+export type AssetType = (typeof ASSET_TYPES)[number];
+
+/** The network a type lives on; `null` means any platform (UGC). */
+export const ASSET_TYPE_PLATFORM: Record<AssetType, Platform | null> = {
+  LINKEDIN_BANNER: "LINKEDIN",
+  LINKEDIN_FEATURED_POST: "LINKEDIN",
+  X_HEADER: "TWITTER",
+  X_PINNED_POST: "TWITTER",
+  INSTAGRAM_BIO_LINK: "INSTAGRAM",
+  INSTAGRAM_PINNED_POST: "INSTAGRAM",
+  YOUTUBE_CHANNEL_BANNER: "YOUTUBE",
+  TIKTOK_BIO_LINK: "TIKTOK",
+  TIKTOK_PINNED_VIDEO: "TIKTOK",
+  FACEBOOK_COVER: "FACEBOOK",
+  THREADS_PINNED_POST: "THREADS",
+  PINTEREST_BOARD: "PINTEREST",
+  TWITCH_PANEL: "TWITCH",
+  INSTAGRAM_POST: "INSTAGRAM",
+  INSTAGRAM_CAROUSEL: "INSTAGRAM",
+  INSTAGRAM_REEL: "INSTAGRAM",
+  INSTAGRAM_STORY: "INSTAGRAM",
+  YOUTUBE_VIDEO: "YOUTUBE",
+  YOUTUBE_SHORT: "YOUTUBE",
+  YOUTUBE_VLOG: "YOUTUBE",
+  LINKEDIN_POST: "LINKEDIN",
+  X_POST: "TWITTER",
+  X_THREAD: "TWITTER",
+  TIKTOK_VIDEO: "TIKTOK",
+  FACEBOOK_POST: "FACEBOOK",
+  FACEBOOK_REEL: "FACEBOOK",
+  FACEBOOK_STORY: "FACEBOOK",
+  THREADS_POST: "THREADS",
+  PINTEREST_PIN: "PINTEREST",
+  SNAPCHAT_STORY: "SNAPCHAT",
+  SNAPCHAT_SPOTLIGHT: "SNAPCHAT",
+  TWITCH_STREAM_MENTION: "TWITCH",
+  PRODUCT_REVIEW: null,
+  TESTIMONIAL_VIDEO: null,
+  PRODUCT_DEMO: null,
+  UNBOXING_VIDEO: null,
+};
+
+/** The types in each category, in display order. */
+export const ASSET_TYPES_BY_CATEGORY: Record<AssetCategory, readonly AssetType[]> = {
+  PROFILE_ASSETS: ASSET_TYPES.slice(0, 13),
+  CONTENT_ASSETS: ASSET_TYPES.slice(13, 32),
+  UGC_ASSETS: ASSET_TYPES.slice(32),
+};
+
+export function categoryOf(type: AssetType): AssetCategory {
+  if (ASSET_TYPES_BY_CATEGORY.PROFILE_ASSETS.includes(type)) return "PROFILE_ASSETS";
+  if (ASSET_TYPES_BY_CATEGORY.CONTENT_ASSETS.includes(type)) return "CONTENT_ASSETS";
+  return "UGC_ASSETS";
+}
+
+/** Currencies the platform settles in (mirrors SUPPORTED_CURRENCIES). */
+export const SUPPORTED_CURRENCIES = ["USD"] as const;
 
 /* ── Contract ─────────────────────────────────────────────────────────────── */
 
@@ -144,7 +245,16 @@ export type ContractStatus = (typeof CONTRACT_STATUSES)[number];
 
 /* ── Payments ─────────────────────────────────────────────────────────────── */
 
-export const PAYMENT_STATUSES = ["PENDING", "PAID", "RELEASED", "REFUNDED", "FAILED"] as const;
+export const PAYMENT_STATUSES = [
+  "PENDING",
+  "PAID",
+  "RELEASING",
+  "RELEASED",
+  "REFUNDING",
+  "REFUNDED",
+  "DISPUTED",
+  "FAILED",
+] as const;
 export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
 
 /**
@@ -250,7 +360,8 @@ export interface Contract {
 
 export interface Campaign {
   id: string;
-  brandId: string;
+  /** Populated (name/email/avatar) on reads. */
+  brandId: Ref<UserRef>;
   title: string;
   description: string;
   assetType: AssetType;

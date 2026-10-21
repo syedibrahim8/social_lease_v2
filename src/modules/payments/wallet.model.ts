@@ -15,7 +15,10 @@ const walletSchema = new Schema<IWalletDocument, IWalletModel>(
     pendingBalance: { type: Number, default: 0, min: 0 },
     availableBalance: { type: Number, default: 0, min: 0 },
     totalEarned: { type: Number, default: 0, min: 0 },
-    stripeAccountId: { type: String, index: true },
+    // One connected account / customer maps to exactly one user. `sparse` lets the
+    // many wallets without one coexist.
+    stripeAccountId: { type: String, unique: true, sparse: true },
+    stripeCustomerId: { type: String, unique: true, sparse: true },
     payoutsEnabled: { type: Boolean, default: false },
     onboardingComplete: { type: Boolean, default: false },
   },

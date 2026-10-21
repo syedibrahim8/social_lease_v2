@@ -24,7 +24,7 @@ const buttonVariants = cva(
     // Named properties only — `transition: all` would also animate layout
     // properties, which cannot run on the GPU.
     "transition-[transform,background-color,border-color,color] duration-[var(--duration-press)]",
-    "ease-[var(--ease-out-vault)]",
+    "ease-[var(--ease-out-sl)]",
     // Press feedback. The interface must visibly acknowledge the press before
     // the network does — especially here, where the next thing that happens is
     // money moving. Subtle: 0.97, not a bounce.

@@ -1,4 +1,5 @@
 import { ApiError } from '@/utils/ApiError';
+import { platformMismatch } from '@/types/assets';
 import { eventBus } from '@/events/event-bus';
 import { resolvePagination, buildPaginationMeta, type Paginated } from '@/utils/pagination';
 import { campaignRepository, type CampaignFilter } from '@/modules/campaigns/campaign.repository';
@@ -23,6 +24,8 @@ import type {
 export const campaignService = {
   /** Create a draft campaign owned by the calling brand. */
   async createCampaign(brandUserId: string, dto: CreateCampaignDto): Promise<ICampaignDocument> {
+    const mismatch = platformMismatch(dto.assetType, dto.platform);
+    if (mismatch) throw ApiError.badRequest(mismatch);
     const campaign = await campaignRepository.create({ brandId: brandUserId, ...dto });
     eventBus.emit('campaign.created', {
       campaignId: campaign._id.toString(),
@@ -80,6 +83,13 @@ export const campaignService = {
     if (nextMax < nextMin) {
       throw ApiError.badRequest('budgetMax must be greater than or equal to budgetMin');
     }
+
+    // The asset type and platform must agree after the update, same as listings.
+    const mismatch = platformMismatch(
+      dto.assetType ?? campaign.assetType,
+      dto.platform ?? campaign.platform
+    );
+    if (mismatch) throw ApiError.badRequest(mismatch);
 
     const updated = await campaignRepository.updateById(id, dto);
     return updated ?? campaign;

@@ -39,6 +39,9 @@ const transactionSchema = new Schema<ITransactionDocument, ITransactionModel>(
 );
 
 transactionSchema.index({ userId: 1, createdAt: -1 });
+// Each payment writes each kind of row for each party at most once. This is the
+// database-level backstop that makes a replayed webhook unable to double-book.
+transactionSchema.index({ paymentId: 1, userId: 1, type: 1 }, { unique: true });
 
 export const TransactionModel = model<ITransactionDocument, ITransactionModel>(
   'Transaction',

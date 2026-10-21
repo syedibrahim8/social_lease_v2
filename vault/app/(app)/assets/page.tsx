@@ -1,37 +1,33 @@
 "use client";
 
 import { Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Users } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { FilterRail } from "@/components/marketplace/filter-rail";
 import { QueryBoundary } from "@/components/feedback/query-boundary";
 import { EmptyState } from "@/components/feedback/empty-state";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardBody } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Amount } from "@/components/money/amount";
+import { AssetCard } from "@/components/assets/asset-card";
+import { RecommendedCreators } from "@/components/ai/recommended-creators";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   getAssets,
   type AssetCategory,
   type AssetFilters,
   type AvailabilityStatus,
 } from "@/lib/api/endpoints/assets";
-import { PLATFORM_LABEL } from "@/lib/config/labels";
-import { PLATFORMS, type Platform } from "@/lib/api/types";
-import { formatNumber } from "@/lib/money";
+import { ASSET_CATEGORY_LABEL, PLATFORM_LABEL } from "@/lib/config/labels";
+import { ASSET_CATEGORIES, PLATFORMS, type Platform } from "@/lib/api/types";
 import { qk } from "@/lib/query";
 
 const GROUPS = [
   {
     key: "category",
     label: "Category",
-    options: [
-      { value: "PROFILE", label: "Profile" },
-      { value: "CONTENT", label: "Content" },
-      { value: "UGC", label: "UGC" },
-    ],
+    options: ASSET_CATEGORIES.map((v) => ({ value: v, label: ASSET_CATEGORY_LABEL[v] })),
   },
   {
     key: "platform",
@@ -47,12 +43,6 @@ const GROUPS = [
     ],
   },
 ];
-
-const AVAILABILITY_TONE = {
-  AVAILABLE: "positive",
-  BUSY: "warning",
-  UNAVAILABLE: "muted",
-} as const;
 
 function GridSkeleton() {
   return (
@@ -77,6 +67,7 @@ function AssetsBody() {
     ...(params.get("search") ? { search: params.get("search") as string } : {}),
     ...(params.get("category") ? { category: params.get("category") as AssetCategory } : {}),
     ...(params.get("platform") ? { platform: params.get("platform") as Platform } : {}),
+    ...(params.get("creatorId") ? { creatorId: params.get("creatorId") as string } : {}),
     ...(params.get("availabilityStatus")
       ? { availabilityStatus: params.get("availabilityStatus") as AvailabilityStatus }
       : {}),
@@ -108,49 +99,9 @@ function AssetsBody() {
             />
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
-              {page.items.map((a) => {
-                const tone = AVAILABILITY_TONE[a.availability?.status ?? "UNAVAILABLE"];
-                return (
-                  <Card key={a.id}>
-                    <CardBody className="flex h-full flex-col gap-3">
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <Badge tone="muted">{PLATFORM_LABEL[a.platform] ?? a.platform}</Badge>
-                        <Badge tone={tone}>{a.availability?.status ?? "UNAVAILABLE"}</Badge>
-                        {a.verificationStatus === "VERIFIED" ? (
-                          <Badge tone="positive">Verified</Badge>
-                        ) : null}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h3 className="text-bone line-clamp-2 text-sm font-medium">{a.title}</h3>
-                        <p className="text-muted mt-1.5 line-clamp-2 text-xs leading-relaxed">
-                          {a.description}
-                        </p>
-                      </div>
-                      <div className="border-line-2 flex items-end justify-between border-t pt-3">
-                        {a.price !== undefined ? (
-                          <div>
-                            <p className="text-muted text-[10px] tracking-[0.14em] uppercase">
-                              From
-                            </p>
-                            <Amount
-                              minor={a.price}
-                              currency={a.currency ?? "USD"}
-                              className="mt-1 block text-[13px]"
-                            />
-                          </div>
-                        ) : (
-                          <span />
-                        )}
-                        {a.estimatedReach ? (
-                          <p className="tnum text-muted text-[11px]">
-                            {formatNumber(a.estimatedReach)} reach
-                          </p>
-                        ) : null}
-                      </div>
-                    </CardBody>
-                  </Card>
-                );
-              })}
+              {page.items.map((a) => (
+                <AssetCard key={a.id} asset={a} href={`/assets/${a.id}`} />
+              ))}
             </div>
           )
         }
@@ -159,15 +110,43 @@ function AssetsBody() {
   );
 }
 
+function FindCreators() {
+  const params = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const view = params.get("view") === "recommended" ? "recommended" : "listings";
+  const setView = (next: string) => {
+    const q = new URLSearchParams(params.toString());
+    if (next === "listings") q.delete("view");
+    else q.set("view", next);
+    router.replace(`${pathname}?${q.toString()}`, { scroll: false });
+  };
+
+  return (
+    <Tabs value={view} onValueChange={setView}>
+      <TabsList>
+        <TabsTrigger value="listings">Listings</TabsTrigger>
+        <TabsTrigger value="recommended">Recommended</TabsTrigger>
+      </TabsList>
+      <TabsContent value="listings">
+        <AssetsBody />
+      </TabsContent>
+      <TabsContent value="recommended">
+        <RecommendedCreators />
+      </TabsContent>
+    </Tabs>
+  );
+}
+
 export default function AssetsPage() {
   return (
     <>
       <PageHeader
         title="Find creators"
-        description="Creator-listed assets, with real reach figures and live availability."
+        description="Creator-listed assets with real reach figures and live availability, or a ranked shortlist for your brief."
       />
       <Suspense fallback={<GridSkeleton />}>
-        <AssetsBody />
+        <FindCreators />
       </Suspense>
     </>
   );

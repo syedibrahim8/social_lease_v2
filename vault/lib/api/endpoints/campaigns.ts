@@ -1,4 +1,4 @@
-import { apiFetch, apiGet, qs } from "@/lib/api/client";
+import { apiDelete, apiFetch, apiGet, apiPatch, apiPost, qs } from "@/lib/api/client";
 import type { AssetType, Campaign, CampaignStatus, Paginated, Platform } from "@/lib/api/types";
 
 export interface CampaignFilters {
@@ -29,4 +29,36 @@ export async function getMyCampaigns(
 /** Throws ApiError 404 for a draft belonging to someone else. */
 export function getCampaign(id: string): Promise<Campaign> {
   return apiGet<Campaign>(`/campaigns/${id}`);
+}
+
+/** What a brand writes. Budgets are minor units; the server owns status. */
+export interface CampaignInput {
+  title: string;
+  description: string;
+  assetType: AssetType;
+  platform: Platform;
+  /** Days the asset stays live. */
+  duration: number;
+  budgetMin: number;
+  budgetMax: number;
+  currency?: string;
+  requirements?: string[];
+}
+
+/** Creates a DRAFT; publishing is a separate, deliberate step. */
+export function createCampaign(input: CampaignInput): Promise<Campaign> {
+  return apiPost<Campaign>("/campaigns", input);
+}
+
+/** 409 once the campaign is past DRAFT/PUBLISHED. */
+export function updateCampaign(id: string, input: Partial<CampaignInput>): Promise<Campaign> {
+  return apiPatch<Campaign>(`/campaigns/${id}`, input);
+}
+
+export function publishCampaign(id: string): Promise<Campaign> {
+  return apiPost<Campaign>(`/campaigns/${id}/publish`);
+}
+
+export function deleteCampaign(id: string): Promise<null> {
+  return apiDelete<null>(`/campaigns/${id}`);
 }

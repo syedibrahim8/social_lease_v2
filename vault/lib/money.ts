@@ -60,6 +60,12 @@ export function splitMoney(minor: number, currency = "USD"): MoneyParts {
 }
 
 /**
+ * The platform fee, as a percentage of the contract value. Mirrors the
+ * backend's PLATFORM_COMMISSION_PERCENT default; change both together.
+ */
+export const PLATFORM_FEE_PERCENT = 2;
+
+/**
  * The platform's cut, mirroring `computeSplit` in the payments service:
  * `commission = round(amount * percent / 100)`, creator gets the remainder.
  *
@@ -70,8 +76,24 @@ export function splitMoney(minor: number, currency = "USD"): MoneyParts {
  */
 export function estimateSplit(
   amount: number,
-  commissionPercent = 10,
+  commissionPercent = PLATFORM_FEE_PERCENT,
 ): { commissionAmount: number; creatorAmount: number } {
   const commissionAmount = Math.round((amount * commissionPercent) / 100);
   return { commissionAmount, creatorAmount: amount - commissionAmount };
+}
+
+/**
+ * Parse an amount typed in whole currency ("1,250.50") into minor units.
+ * Returns null for anything that isn't a non-negative amount with at most two
+ * decimals — the form says so rather than sending a guess.
+ */
+export function parseMajorToMinor(input: string): number | null {
+  const cleaned = input.replace(/[,\s]/g, "");
+  if (!/^\d+(\.\d{1,2})?$/.test(cleaned)) return null;
+  return Math.round(Number(cleaned) * 100);
+}
+
+/** Minor units back into an editable major-unit string ("1250.5" → "1250.50"). */
+export function minorToMajorInput(minor: number): string {
+  return (minor / 100).toFixed(2).replace(/\.00$/, "");
 }

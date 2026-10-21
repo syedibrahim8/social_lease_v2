@@ -52,7 +52,8 @@ export default function RegisterPage() {
   const onSubmit = handleSubmit(async (values) => {
     try {
       await signUp(values);
-      router.replace("/dashboard");
+      // A new account has no profile yet, and nothing works without one.
+      router.replace("/onboarding");
     } catch (error) {
       applyServerErrors(error, setError, "Could not create your account.");
     }
@@ -74,7 +75,7 @@ export default function RegisterPage() {
             ADMIN is absent because the backend refuses to self-assign it. */}
         <fieldset>
           <legend className="text-bone-2 mb-2 text-xs font-medium">
-            How will you use Vault?
+            How will you use Social Lease?
           </legend>
           <div className="grid gap-2 sm:grid-cols-2">
             {ROLES.map((r) => {

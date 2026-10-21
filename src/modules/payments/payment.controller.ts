@@ -36,6 +36,16 @@ export const paymentController = {
     return ApiResponse.created(res, result, 'Checkout session created');
   }),
 
+  // Confirm a checkout with Stripe directly (the success page, while the
+  // webhook is still on its way). Party-scoped in the service.
+  sync: asyncHandler(async (req, res) => {
+    const payment = await paymentService.syncContractPayment(
+      requireParam(req, 'contractId'),
+      requireUserId(req)
+    );
+    return ApiResponse.ok(res, payment, 'Payment status confirmed');
+  }),
+
   release: asyncHandler(async (req, res) => {
     const payment = await paymentService.releasePayment(
       requireParam(req, 'contractId'),

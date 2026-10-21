@@ -43,7 +43,7 @@ export function AccordionTrigger({
           aria-hidden="true"
           className={cn(
             "text-muted size-4 shrink-0",
-            "transition-transform duration-[var(--duration-base)] ease-[var(--ease-out-vault)]",
+            "transition-transform duration-[var(--duration-base)] ease-[var(--ease-out-sl)]",
             "group-data-[state=open]:rotate-180",
           )}
         />
@@ -61,8 +61,8 @@ export function AccordionContent({
     <Primitive.Content
       className={cn(
         "overflow-hidden",
-        "data-[state=open]:animate-[vault-accordion-down_240ms_var(--ease-out-vault)]",
-        "data-[state=closed]:animate-[vault-accordion-up_180ms_var(--ease-out-vault)]",
+        "data-[state=open]:animate-[sl-accordion-down_240ms_var(--ease-out-sl)]",
+        "data-[state=closed]:animate-[sl-accordion-up_180ms_var(--ease-out-sl)]",
       )}
       {...props}
     >

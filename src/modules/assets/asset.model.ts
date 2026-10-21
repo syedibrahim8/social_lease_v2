@@ -1,10 +1,10 @@
 import { Schema, model } from 'mongoose';
-import { PLATFORMS } from '@/modules/campaigns/campaign.types';
+import { PLATFORMS } from '@/types/assets';
 import { VERIFICATION_STATES } from '@/types/verification';
 import {
   ASSET_CATEGORIES,
   AVAILABILITY_STATUSES,
-  MARKETPLACE_ASSET_TYPES,
+  ASSET_TYPES,
   type IAssetDocument,
   type IAssetModel,
 } from '@/modules/assets/asset.types';
@@ -63,13 +63,22 @@ const availabilitySchema = new Schema(
 const assetSchema = new Schema<IAssetDocument, IAssetModel>(
   {
     creatorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    assetType: { type: String, enum: MARKETPLACE_ASSET_TYPES, required: true, index: true },
+    assetType: { type: String, enum: ASSET_TYPES, required: true, index: true },
     platform: { type: String, enum: PLATFORMS, required: true, index: true },
     category: { type: String, enum: ASSET_CATEGORIES, required: true, index: true },
     title: { type: String, required: true, trim: true, maxlength: 160 },
     description: { type: String, required: true, trim: true, maxlength: 2000 },
     estimatedReach: { type: Number, default: 0, min: 0 },
     averageViews: { type: Number, default: 0, min: 0 },
+    price: { type: Number, min: 0 },
+    currency: {
+      type: String,
+      default: 'USD',
+      uppercase: true,
+      trim: true,
+      minlength: 3,
+      maxlength: 3,
+    },
     audienceDemographics: { type: audienceDemographicsSchema },
     availability: { type: availabilitySchema, default: () => ({}) },
     verificationStatus: {
@@ -96,6 +105,8 @@ const assetSchema = new Schema<IAssetDocument, IAssetModel>(
 
 // Full-text search over the listing copy.
 assetSchema.index({ title: 'text', description: 'text' });
+// Brands browsing within a budget.
+assetSchema.index({ price: 1 });
 // A creator's own assets, newest first.
 assetSchema.index({ creatorId: 1, createdAt: -1 });
 

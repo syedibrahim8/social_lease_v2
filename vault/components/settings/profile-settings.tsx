@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ShieldCheck, UserRoundX } from "lucide-react";
@@ -47,7 +48,7 @@ function VerificationRow({ label, state }: { label: string; state: VerificationS
     <div className="border-line-2 flex items-center justify-between gap-3 rounded-lg border px-3.5 py-2.5">
       <div className="min-w-0">
         <p className="text-bone-2 text-[13px]">{label}</p>
-        <p className="text-muted mt-0.5 text-[11px]">Set by review. You cannot change this.</p>
+        <p className="text-muted mt-0.5 text-[11px]">Set by review, not editable here.</p>
       </div>
       <Badge tone={VERIFICATION_TONE[state]}>
         {state === "VERIFIED" ? <ShieldCheck aria-hidden="true" /> : null}
@@ -195,11 +196,18 @@ export function ProfileSettings({ isCreator }: { isCreator: boolean }) {
         description={
           notFound
             ? isCreator
-              ? "Creating a creator profile is part of onboarding and is not built into Vault yet. The original app can create one."
-              : "Creating a company profile is part of onboarding and is not built into Vault yet. The original app can create one."
+              ? "Set up your creator profile to start applying to campaigns."
+              : "Set up your company profile to start posting campaigns."
             : query.error instanceof Error
               ? query.error.message
               : "Please try again."
+        }
+        action={
+          notFound ? (
+            <Button asChild size="sm" variant="gold">
+              <Link href="/onboarding">Set up profile</Link>
+            </Button>
+          ) : undefined
         }
       />
     );
@@ -386,7 +394,12 @@ export function ProfileSettings({ isCreator }: { isCreator: boolean }) {
 
       <Card>
         <CardBody className="space-y-2.5">
-          <p className="text-bone text-[13px] font-medium">Verification</p>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-bone text-[13px] font-medium">Verification</p>
+            <Link href="/verifications" className="text-gold-lo text-[12px] hover:underline">
+              Request verification
+            </Link>
+          </div>
           {isCreator ? (
             <>
               <VerificationRow

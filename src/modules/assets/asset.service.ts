@@ -3,13 +3,12 @@ import { resolvePagination, buildPaginationMeta, type Paginated } from '@/utils/
 import { assetRepository, type AssetFilter } from '@/modules/assets/asset.repository';
 import {
   ASSET_TYPE_CATEGORY,
-  ASSET_TYPE_PLATFORM,
   type IAssetAnalytics,
   type IAssetDocument,
   type IAvailability,
-  type MarketplaceAssetType,
+  type AssetType,
 } from '@/modules/assets/asset.types';
-import type { Platform } from '@/modules/campaigns/campaign.types';
+import { platformMismatch, type Platform } from '@/types/assets';
 import type {
   AvailabilityBlockDto,
   CreateAssetDto,
@@ -20,11 +19,9 @@ import type {
 type AssetPatch = Parameters<typeof assetRepository.updateById>[1];
 
 /** A type-locked asset must be listed on its canonical platform; UGC is flexible. */
-function assertPlatformForType(assetType: MarketplaceAssetType, platform: Platform): void {
-  const canonical = ASSET_TYPE_PLATFORM[assetType];
-  if (canonical && platform !== canonical) {
-    throw ApiError.badRequest(`A ${assetType} must be listed on ${canonical}`);
-  }
+function assertPlatformForType(assetType: AssetType, platform: Platform): void {
+  const mismatch = platformMismatch(assetType, platform);
+  if (mismatch) throw ApiError.badRequest(mismatch);
 }
 
 function buildFilter(query: ListAssetsQuery): AssetFilter {
@@ -38,6 +35,7 @@ function buildFilter(query: ListAssetsQuery): AssetFilter {
   if (query.creatorId) filter.creatorId = query.creatorId;
   if (query.minReach !== undefined) filter.estimatedReach = { $gte: query.minReach };
   if (query.minViews !== undefined) filter.averageViews = { $gte: query.minViews };
+  if (query.maxPrice !== undefined) filter.price = { $lte: query.maxPrice };
   return filter;
 }
 
@@ -61,6 +59,8 @@ export const assetService = {
       description: dto.description,
       estimatedReach: dto.estimatedReach,
       averageViews: dto.averageViews,
+      price: dto.price,
+      currency: dto.currency,
       audienceDemographics: dto.audienceDemographics,
       availability: dto.availability,
     });
@@ -109,6 +109,8 @@ export const assetService = {
     if (dto.description !== undefined) patch.description = dto.description;
     if (dto.estimatedReach !== undefined) patch.estimatedReach = dto.estimatedReach;
     if (dto.averageViews !== undefined) patch.averageViews = dto.averageViews;
+    if (dto.price !== undefined) patch.price = dto.price;
+    if (dto.currency !== undefined) patch.currency = dto.currency;
     if (dto.audienceDemographics !== undefined) {
       patch.audienceDemographics = dto.audienceDemographics;
     }

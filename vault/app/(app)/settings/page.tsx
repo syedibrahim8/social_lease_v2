@@ -10,6 +10,10 @@ import { ProfileSettings } from "@/components/settings/profile-settings";
 import { SecuritySettings } from "@/components/settings/security-settings";
 import { NotificationSettings } from "@/components/settings/notification-settings";
 import { ConnectStatusCard } from "@/components/wallet/connect-status-card";
+import { ReachSettings } from "@/components/settings/reach-settings";
+import { EmptyState } from "@/components/feedback/empty-state";
+import { useMyProfile } from "@/lib/auth/use-profile";
+import { Radio } from "lucide-react";
 import { useAuth } from "@/lib/auth/auth-provider";
 
 function TabSkeleton() {
@@ -22,6 +26,22 @@ function TabSkeleton() {
       </CardBody>
     </Card>
   );
+}
+
+/** Channels need a profile to hang off; until onboarding, point there. */
+function ChannelsTab() {
+  const { creatorProfile, isPending } = useMyProfile();
+  if (isPending) return <TabSkeleton />;
+  if (!creatorProfile) {
+    return (
+      <EmptyState
+        icon={Radio}
+        title="Set up your profile first"
+        description="Your channels and audience numbers are part of your creator profile."
+      />
+    );
+  }
+  return <ReachSettings profile={creatorProfile} />;
 }
 
 function SettingsBody() {
@@ -45,6 +65,7 @@ function SettingsBody() {
     <Tabs value={tab} onValueChange={setTab}>
       <TabsList>
         <TabsTrigger value="profile">Profile</TabsTrigger>
+        {isCreator ? <TabsTrigger value="channels">Channels</TabsTrigger> : null}
         <TabsTrigger value="security">Security</TabsTrigger>
         {isCreator ? <TabsTrigger value="payouts">Payouts</TabsTrigger> : null}
         <TabsTrigger value="notifications">Notifications</TabsTrigger>
@@ -53,6 +74,12 @@ function SettingsBody() {
       <TabsContent value="profile">
         <ProfileSettings isCreator={isCreator} />
       </TabsContent>
+
+      {isCreator ? (
+        <TabsContent value="channels">
+          <ChannelsTab />
+        </TabsContent>
+      ) : null}
 
       <TabsContent value="security">
         <SecuritySettings />
@@ -65,7 +92,7 @@ function SettingsBody() {
             <Card>
               <CardBody>
                 <p className="text-muted text-xs leading-relaxed">
-                  Vault never holds your bank details. Stripe does, and money released from
+                  Social Lease never holds your bank details. Stripe does, and money released from
                   escrow goes straight to the account you connected there. Balances and the
                   full ledger live on the wallet screen.
                 </p>

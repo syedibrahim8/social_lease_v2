@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   VAULT — design tokens
+   SOCIAL LEASE — design tokens
    ---------------------------------------------------------------------------
    Dark-only by deliberate commitment. There is no light theme and no toggle;
    tokens still live on :root so one could be added later without restructuring.
@@ -88,8 +88,8 @@
         UI durations stay under 300ms. `money` is the one exception — it is
         explanatory rather than interactive, and it is the whole point of the
         screen it appears on. ────────────────────────────────────────────── */
-  --ease-out-vault: cubic-bezier(0.23, 1, 0.32, 1);
-  --ease-in-out-vault: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-out-sl: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-sl: cubic-bezier(0.77, 0, 0.175, 1);
   --duration-press: 140ms;
   --duration-fast: 180ms;
   --duration-base: 260ms;
@@ -176,12 +176,12 @@ body {
       transparent 62%
     );
     transform: translateX(-120%);
-    animation: vault-sheen 3.4s ease-in-out infinite;
+    animation: sl-sheen 3.4s ease-in-out infinite;
     pointer-events: none;
   }
 }
 
-@keyframes vault-sheen {
+@keyframes sl-sheen {
   0%,
   62% {
     transform: translateX(-120%);
@@ -195,7 +195,7 @@ body {
 /* Disclosure rows (the landing page's questions). CSS keyframes rather than a
    spring: the open/close is predetermined, so it runs off the main thread, and
    a transition cannot animate to `auto` height. Radix measures it for us. */
-@keyframes vault-accordion-down {
+@keyframes sl-accordion-down {
   from {
     height: 0;
     opacity: 0;
@@ -206,7 +206,7 @@ body {
   }
 }
 
-@keyframes vault-accordion-up {
+@keyframes sl-accordion-up {
   from {
     height: var(--radix-accordion-content-height);
     opacity: 1;

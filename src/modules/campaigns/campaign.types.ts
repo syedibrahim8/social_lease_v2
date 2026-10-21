@@ -1,4 +1,5 @@
 import type { Document, Model, Types } from 'mongoose';
+import type { AssetType, Platform } from '@/types/assets';
 
 /**
  * Campaign lifecycle states. The brand drives the early transitions
@@ -26,31 +27,9 @@ export const EDITABLE_STATUSES: readonly CampaignStatus[] = ['DRAFT', 'PUBLISHED
 /** A campaign may be deleted only before any money/work is committed. */
 export const DELETABLE_STATUSES: readonly CampaignStatus[] = ['DRAFT', 'PUBLISHED', 'CANCELLED'];
 
-/** Social asset being leased/produced. */
-export const ASSET_TYPES = [
-  'LINKEDIN_BANNER',
-  'LINKEDIN_POST',
-  'INSTAGRAM_REEL',
-  'INSTAGRAM_STORY',
-  'YOUTUBE_SHORT',
-  'YOUTUBE_VIDEO',
-  'TWITTER_PINNED_POST',
-  'TWITTER_HEADER',
-  'BIO_MENTION',
-  'UGC_CONTENT',
-] as const;
-export type AssetType = (typeof ASSET_TYPES)[number];
-
-export const PLATFORMS = [
-  'LINKEDIN',
-  'INSTAGRAM',
-  'YOUTUBE',
-  'TWITTER',
-  'FACEBOOK',
-  'TIKTOK',
-  'OTHER',
-] as const;
-export type Platform = (typeof PLATFORMS)[number];
+/** The shared social-asset catalogue (see `src/types/assets.ts`). */
+export { ASSET_TYPES, PLATFORMS } from '@/types/assets';
+export type { AssetType, Platform } from '@/types/assets';
 
 /** The Campaign domain entity as stored in MongoDB. */
 export interface ICampaign {

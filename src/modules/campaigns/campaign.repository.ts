@@ -1,4 +1,4 @@
-import { Types, type FilterQuery } from 'mongoose';
+import { Types, type ClientSession, type FilterQuery } from 'mongoose';
 import { CampaignModel } from '@/modules/campaigns/campaign.model';
 import type {
   CampaignStatus,
@@ -41,6 +41,19 @@ export const campaignRepository = {
     return CampaignModel.findByIdAndUpdate(id, { $set: data }, { new: true, runValidators: true })
       .populate(BRAND_POPULATE)
       .exec();
+  },
+
+  /** Status-only write for the money path; runs inside the caller's transaction. */
+  async setStatus(
+    id: string | Types.ObjectId,
+    status: CampaignStatus,
+    session?: ClientSession
+  ): Promise<void> {
+    await CampaignModel.updateOne(
+      { _id: id },
+      { $set: { status } },
+      session ? { session } : {}
+    ).exec();
   },
 
   deleteById(id: string): Promise<ICampaignDocument | null> {

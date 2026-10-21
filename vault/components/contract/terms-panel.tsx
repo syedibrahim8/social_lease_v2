@@ -1,6 +1,6 @@
 import { Card, CardBody } from "@/components/ui/card";
 import { Amount } from "@/components/money/amount";
-import { estimateSplit } from "@/lib/money";
+import { PLATFORM_FEE_PERCENT, estimateSplit } from "@/lib/money";
 import type { Contract, Payment } from "@/lib/api/types";
 
 /**
@@ -14,7 +14,7 @@ import type { Contract, Payment } from "@/lib/api/types";
 export function TermsPanel({
   contract,
   payment,
-  commissionPercent = 10,
+  commissionPercent = PLATFORM_FEE_PERCENT,
 }: {
   contract: Contract;
   payment?: Payment | null;
